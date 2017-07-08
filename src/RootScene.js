@@ -22,20 +22,20 @@ class RootScene extends PureComponent {
 
 const Navigator = StackNavigator(
   {
-    Login: {
-      screen: Login
+    InvoiceList: {
+      screen: InvoiceList
+    },
+    MyInfo: {
+      screen: MyInfo
     },
     Home: {
       screen: Home
     },
-    InvoiceList: {
-      screen: InvoiceList
+    Login: {
+      screen: Login
     },
     Detail: {
       screen: Detail
-    },
-    MyInfo: {
-      screen: MyInfo
     },
     Camera: {
       screen: Camera

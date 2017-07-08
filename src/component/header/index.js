@@ -67,12 +67,18 @@ const styles = StyleSheet.create({
   left: {
     position: 'absolute',
     left: 8,
-    top: 8
+    top: 0,
+    height: 50,
+    flexDirection: 'row',
+    alignItems: 'center'
   },
   right: {
     position: 'absolute',
     right: 10,
-    top: 8
+    top: 0,
+    height: 50,
+    flexDirection: 'row',
+    alignItems: 'center'
   }
 });
 

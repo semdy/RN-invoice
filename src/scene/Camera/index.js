@@ -14,6 +14,8 @@ import {
 import Toast from 'react-native-root-toast';
 import Camera from 'react-native-camera';
 import {QRScannerView} from 'ac-qrcode';
+import Spinner from '../../component/spinner';
+import fetch from '../../service/fetch';
 
 export default class DefaultScreen extends Component {
   constructor(props) {
@@ -28,9 +30,10 @@ export default class DefaultScreen extends Component {
         type: Camera.constants.Type.back,
         orientation: Camera.constants.Orientation.auto,
         flashMode: Camera.constants.FlashMode.auto,
-        captureQuality: Camera.constants.CaptureQuality.medium
+        captureQuality: Camera.constants.CaptureQuality.low
       },
-      captureImgURI: null
+      captureImgURI: null,
+      loaded: true
     };
   }
 
@@ -41,7 +44,25 @@ export default class DefaultScreen extends Component {
   }
 
   captureDone(){
-
+    this.setState({
+      loaded: false
+    });
+    fetch.post("uploadSales", {file: this.state.captureImgURI}).then(data => {
+      if( data.success ){
+        Toast.show("上传成功");
+        this.captureResume();
+      } else {
+        Toast.show("上传失败 " + (data.message||""));
+      }
+      this.setState({
+        loaded: true
+      });
+    }, errMsg => {
+      Toast.show("上传失败, 请重试!");
+      this.setState({
+        loaded: true
+      });
+    });
   }
 
   render() {
@@ -106,7 +127,10 @@ export default class DefaultScreen extends Component {
         </View>
            :
         <View style={styles.capturePreview}>
-          <Image source={{uri: captureImgURI}} style={styles.previewImg}/>
+          <Image
+            source={{uri: captureImgURI}}
+            style={styles.previewImg}
+          />
           <View style={styles.resultActions}>
             <TouchableOpacity
               activeOpacity={0.9}
@@ -130,6 +154,10 @@ export default class DefaultScreen extends Component {
             </TouchableOpacity>
           </View>
         </View>
+        }
+        {
+          !this.state.loaded &&
+          <Spinner/>
         }
       </View>
     )

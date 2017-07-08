@@ -9,8 +9,7 @@ import {
 
 import Button from '../../component/button';
 import FormItem from '../../component/formitem';
-import fetch from '../../service/fetch';
-import api from '../../service/api';
+import {login} from '../../service/auth';
 
 import Toast from 'react-native-root-toast';
 
@@ -26,19 +25,19 @@ class Login extends PureComponent {
   handleClick(){
     let username = this.refs.username.value;
     let password = this.refs.password.value;
-    /*this.setState({
+    if( !username ) return Toast.show("请输入用户名");
+    if( !password ) return Toast.show("请输入密码");
+    this.setState({
       isLogining: true
-    });*/
-
-   /* fetch(api.login, {username, password}).then(res => {
-
-    }).catch(err => {
+    });
+    login(username, password).then(res => {
+      this.props.navigation.navigate('Home', res);
+    }, errMsg => {
+      Toast.show(errMsg);
       this.setState({
         isLogining: false
       });
-    });*/
-
-    this.props.navigation.navigate('Home', {user: username});
+    });
   }
 
   render() {

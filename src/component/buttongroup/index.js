@@ -11,7 +11,7 @@ class ButtonGroup extends PureComponent {
     super(props);
   }
   render() {
-    let {activeIndex, items, size, vertical} = this.props;
+    let {activeIndex, items, size, vertical, onPress} = this.props;
     return (
         <View
           style={[styles.buttonWrap, vertical ? {} : {flexDirection: 'row',}]}
@@ -22,7 +22,7 @@ class ButtonGroup extends PureComponent {
                 <TouchableWithoutFeedback
                   key={i}
                   style={{width: vertical ? "100%" : 1/items.length*100 + "%"}}
-                  onPress={item.handler.bind(this, i, item)}
+                  onPress={onPress.bind(this, i, item)}
                 >
                   <View
                     style={[styles.button, styles[size], activeIndex === i && styles.selected, i !== 0 && (vertical ? styles.nextButtonsV : styles.nextButtonsH), i === 0 && (vertical ? styles.firstButtonV : styles.firstButtonH), (i === items.length - 1) && (vertical ? styles.lastButtonV : styles.lastButtonH) ]}
@@ -103,7 +103,8 @@ ButtonGroup.defaultProps = {
   activeIndex: 0,
   items: [],
   size: 'normal',
-  vertical: false
+  vertical: false,
+  onPress: function () {}
 };
 
 ButtonGroup.propTypes = {
@@ -115,7 +116,8 @@ ButtonGroup.propTypes = {
     })
   ),
   size: PropTypes.string,
-  vertical: PropTypes.bool
+  vertical: PropTypes.bool,
+  onPress: PropTypes.func
 };
 
 export default ButtonGroup;

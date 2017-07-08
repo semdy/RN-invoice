@@ -3,7 +3,7 @@ import {
   View,
   Text,
   StyleSheet,
-  FlatList,
+  ScrollView,
   Picker,
   Dimensions,
   TouchableOpacity
@@ -14,6 +14,7 @@ import Header from '../../component/header';
 import Button from '../../component/button';
 import FormItem from '../../component/formitem';
 import CheckBox from 'react-native-check-box'
+import Spinner from '../../component/spinner';
 import {confirm} from '../../utils';
 
 import Toast from 'react-native-root-toast';
@@ -40,12 +41,10 @@ class InvoiceList extends PureComponent {
       invoiceStatus: "",
       data: []
     };
-    this.page = 1;
   }
 
   handleQuery(){
-    this.page = 1;
-    this.fetchData(this.refs.code.value, this.state.invoiceStatus, this.state.invoiceDay, this.page);
+    this.fetchData(this.refs.code.value, this.state.invoiceStatus, this.state.invoiceDay, 1);
   }
 
   handleDel(){
@@ -82,62 +81,23 @@ class InvoiceList extends PureComponent {
     this.props.navigation.navigate('Camera');
   }
 
-  handleCheck(item, isChecked){
+  handleCheck(i, item, isChecked){
     item.checked = isChecked;
   }
 
-  fetchData(invoiceNumber="", status="", day="", page=1, isAppend=false){
+  fetchData(invoiceNumber="", status="", day="", page=1){
     this.setState({
       loaded: false
     });
     let params = {customer: session.get().id, invoiceNumber, status, day, page};
     fetch.get("invoiceList", params).then(data => {
       this.setState({
-        data: isAppend ? this.state.data.concat(data) : data
+        data: data
       });
       this.setState({
         loaded: true
       });
     });
-  }
-
-  appendData(){
-    if( !this.state.loaded ) return;
-    this.fetchData(this.refs.code.value, this.state.invoiceStatus, this.state.invoiceDay, ++this.page, true);
-  }
-
-  keyExtractor(item) {
-    return item.invoice.id;
-  }
-
-  renderHeader(){
-    return (
-      <View style={[styles.tableRow, styles.tableHeader]}>
-        <Text style={styles.lineNumber}>序号</Text>
-        <Text style={styles.tableCell}>发票号</Text>
-        <Text style={styles.tableCell}>状态</Text>
-      </View>
-    );
-  }
-
-  renderItem(info){
-    let item = info.item;
-    return (
-      <TouchableOpacity
-        style={styles.tableRow}
-        activeOpacity={0.7}
-        onPress={this.props.navigation.navigate.bind(this, 'Detail', item)}
-      >
-        <CheckBox
-          style={styles.checkbox}
-          onClick={this.handleCheck.bind(this, item)}
-          isChecked={false}
-        />
-        <Text style={styles.lineNumber}>{item.number}</Text>
-        <Text style={styles.tableCell}>{item.invoiceNumber}</Text>
-        <Text style={styles.tableCell}>{INVOICE_STATUS[item.invoice.status]||"-"}</Text>
-      </TouchableOpacity>
-    )
   }
 
   componentDidMount(){
@@ -191,20 +151,39 @@ class InvoiceList extends PureComponent {
           </View>
 
           <View style={styles.listViewContainer}>
+            <View style={[styles.tableRow, styles.tableHeader]}>
+              <Text style={styles.lineNumber}>序号</Text>
+              <Text style={styles.tableCell}>发票号</Text>
+              <Text style={styles.tableCell}>状态</Text>
+            </View>
+            <ScrollView styles={styles.scrollview}>
+              {
+                data.map((item, i) => {
+                  return (
+                    <TouchableOpacity
+                      key={i}
+                      style={styles.tableRow}
+                      activeOpacity={0.7}
+                      onPress={this.props.navigation.navigate.bind(this, 'Detail', item)}>
+                      <CheckBox
+                        style={styles.checkbox}
+                        onClick={this.handleCheck.bind(this, i, item)}
+                        isChecked={false}
+                      />
+                      <Text style={styles.lineNumber}>{item.number}</Text>
+                      <Text style={styles.tableCell}>{item.invoiceNumber}</Text>
+                      <Text style={styles.tableCell}>{INVOICE_STATUS[item.invoice.status]||"-"}</Text>
+                    </TouchableOpacity>
+                  )
+                })
+              }
+            </ScrollView>
+
             {
-              this.renderHeader()
+              !loaded &&
+              <Spinner/>
             }
-            <FlatList
-              style={styles.scrollview}
-              data={data}
-              keyExtractor={this.keyExtractor}
-              onRefresh={this.handleQuery.bind(this)}
-              refreshing={!loaded}
-              onEndReachedThreshold={0.01}
-              //ListHeaderComponent={this.renderHeader}
-              renderItem={this.renderItem.bind(this)}
-              onEndReached={this.appendData.bind(this)}
-            />
+
           </View>
 
         </View>

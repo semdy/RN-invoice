@@ -5,72 +5,78 @@ import {
   StyleSheet
 } from 'react-native';
 
-import Toast from 'react-native-root-toast';
-
 import fetch from '../../service/fetch';
-import api from '../../service/api';
+import {session} from '../../service/auth';
 
 import Icon from '../../component/icon';
 import Header from '../../component/header';
 import Button from '../../component/button';
 import ButtonGroup from '../../component/buttongroup';
 import PercentageCircle from '../../component/percentagecircle';
+import Spinner from '../../component/spinner';
 
 class Home extends PureComponent {
-
-  static navigationOptions = ({navigation}) => ({
-    title: "主页",
-    headerTintColor: "#fff",
-    headerLeft: null,
-    headerRight: (
-      <Text style={{color: "#fff"}}>欢迎{/*{navigation.state.params.user}*/}</Text>
-    ),
-    headerStyle: styles.header
-  });
 
   constructor(props) {
     super(props);
     this.state = {
-      activeIndex: 0
+      activeIndex: 0,
+      loaded: false,
+      data: {
+        statusTotal: []
+      }
     };
-
-    let that = this;
 
     this.buttonItems = [
       {
         text: "当天",
-        handler: function(i) {
-          that.setIndex(i);
-        }
+        value: 1
       },
       {
         text: "7天",
-        handler: function(i) {
-          that.setIndex(i);
-        }
+        value: 7
       },
       {
         text: "30天",
-        handler: function(i) {
-          that.setIndex(i);
-        }
+        value: 30
       },
       {
-        text: "全部",
-        handler: function(i) {
-          that.setIndex(i);
-        }
+        text: "全部"
       }];
   }
 
   componentWillMount(){
     //this.props.navigation.navigate("Login");
+    this.fetchData(1);
   }
 
-  setIndex(i){
+  doRefresh(){
+    this.fetchData(this.buttonItems[this.state.activeIndex].value);
+  }
+
+  fetchData(day){
+    this.setState({
+      loaded: false
+    });
+    let params = {customer: session.get().id};
+    if( day !== undefined ){
+      params.day = day;
+    }
+    fetch.get("invoiceCount", params).then(data => {
+      this.setState({
+        data: data
+      });
+      this.setState({
+        loaded: true
+      });
+    });
+  }
+
+  handleType(i, item){
     this.setState({
       activeIndex: i
     });
+    this.fetchData(item.value);
   }
 
   handleCamClick(){
@@ -81,15 +87,23 @@ class Home extends PureComponent {
     this.props.navigation.navigate('MyInfo');
   }
 
+  _getValueByStatus(status){
+     let result = this.state.data.statusTotal.find((item) => {
+       return item.status === status;
+     });
+
+     return result ? (result.total || 0) : 0
+  }
+
   render() {
-    let {activeIndex} = this.state;
+    let {activeIndex, data, loaded} = this.state;
     return (
       <View style={styles.container}>
         <Header
           left={(
             <Icon name="setting" onPress={this.handleSetPress.bind(this)}/>
           )}
-          right="欢迎xxx"
+          right={`欢迎 ${session.get().name}`}
         >
           主页
         </Header>
@@ -97,10 +111,22 @@ class Home extends PureComponent {
           <Text style={styles.title}>发票上传情况</Text>
           <View style={styles.topWrap}>
             <View style={styles.circle}>
-              <PercentageCircle radius={50} percent={85} color={"#3498db"}/>
+              <PercentageCircle
+                radius={50}
+                percent={data.statusTotal.length/5*100}
+                color={"#3498db"}
+              >
+                <Text style={{fontSize: 16}}>{data.statusTotal.length}/5</Text>
+              </PercentageCircle>
             </View>
             <View style={styles.buttonGroupWrap}>
-              <ButtonGroup activeIndex={activeIndex} vertical={true} items={this.buttonItems} size="small"/>
+              <ButtonGroup
+                activeIndex={activeIndex}
+                vertical={true}
+                items={this.buttonItems}
+                size="small"
+                onPress={this.handleType.bind(this)}
+              />
             </View>
           </View>
         </View>
@@ -109,24 +135,28 @@ class Home extends PureComponent {
           <Text style={styles.title}>快速入口</Text>
           <View style={styles.buttonItem}>
             <View style={styles.buttonWrap}>
-              <Button style={styles.button}>四要素更新</Button>
+              <Button style={styles.button}>四要素更新({this._getValueByStatus("needChange")})</Button>
             </View>
             <View style={styles.buttonWrap}>
-              <Button style={styles.button}>补出库单</Button>
+              <Button style={styles.button}>补出库单({this._getValueByStatus("noSales")})</Button>
             </View>
           </View>
           <View style={styles.buttonItem}>
             <View style={styles.buttonWrap}>
-              <Button style={styles.button}>无法识别</Button>
+              <Button style={styles.button}>无法识别({this._getValueByStatus("noInvoice")})</Button>
             </View>
             <View style={styles.buttonWrap}>
-              <Button style={styles.button}>7天未找到</Button>
+              <Button style={styles.button}>7天未查到({this._getValueByStatus("failed")})</Button>
             </View>
           </View>
+          <Button type="warning" style={styles.buttonCenter}>查询中({this._getValueByStatus("waiting")})</Button>
         </View>
 
         <View style={styles.footer}>
-          <Button style={{width: 100}}>主页</Button>
+          <Button
+            style={{width: 100}}
+            onPress={this.doRefresh.bind(this)}
+          >主页</Button>
           <Icon
             name="camera_1"
             style={{padding: 3}}
@@ -134,12 +164,18 @@ class Home extends PureComponent {
             onPress={this.handleCamClick.bind(this)}
           />
           <Button
+            activeOpacity={1}
             style={{width: 100}}
             onPress={this.props.navigation.navigate.bind(this, 'InvoiceList')}
           >
             发票列表
           </Button>
         </View>
+
+        {
+          !loaded &&
+          <Spinner/>
+        }
 
       </View>
     );
@@ -150,13 +186,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#ffffff"
-  },
-  header: {
-    paddingLeft: 15,
-    paddingRight: 15,
-    height: 50,
-    justifyContent: 'center',
-    backgroundColor: '#c00000'
   },
   title: {
     marginTop: 20,
@@ -186,6 +215,7 @@ const styles = StyleSheet.create({
     width: 60
   },
   entrance: {
+    position: "relative",
     marginLeft: 25,
     marginRight: 25,
     marginBottom: 15
@@ -200,7 +230,19 @@ const styles = StyleSheet.create({
     paddingLeft: 10
   },
   button: {
-    height: 60
+    height: 70
+  },
+  buttonCenter: {
+    position: 'absolute',
+    left: '50%',
+    top: '50%',
+    width: 86,
+    height: 86,
+    marginLeft: -40,
+    marginTop: -20,
+    borderWidth: 6,
+    borderColor: '#fff',
+    borderRadius: 45
   },
   footer: {
     position: 'absolute',

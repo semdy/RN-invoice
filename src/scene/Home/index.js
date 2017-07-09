@@ -14,6 +14,7 @@ import Button from '../../component/button';
 import ButtonGroup from '../../component/buttongroup';
 import PercentageCircle from '../../component/percentagecircle';
 import Spinner from '../../component/spinner';
+import Toast from 'react-native-root-toast';
 
 class Home extends PureComponent {
 
@@ -26,6 +27,8 @@ class Home extends PureComponent {
         statusTotal: []
       }
     };
+
+    this.day = 1;
 
     this.buttonItems = [
       {
@@ -47,7 +50,7 @@ class Home extends PureComponent {
 
   componentWillMount(){
     //this.props.navigation.navigate("Login");
-    this.fetchData(1);
+    this.fetchData(this.day);
   }
 
   doRefresh(){
@@ -64,15 +67,16 @@ class Home extends PureComponent {
     }
     fetch.get("invoiceCount", params).then(data => {
       this.setState({
-        data: data
-      });
-      this.setState({
+        data: data,
         loaded: true
       });
+    }, err => {
+      Toast.show(err);
     });
   }
 
   handleType(i, item){
+    this.day = item.value;
     this.setState({
       activeIndex: i
     });
@@ -85,6 +89,10 @@ class Home extends PureComponent {
 
   handleSetPress(){
     this.props.navigation.navigate('MyInfo');
+  }
+
+  handleButtonClick(status, day){
+    this.props.navigation.navigate('InvoiceList', {status, day});
   }
 
   _getValueByStatus(status){
@@ -135,21 +143,42 @@ class Home extends PureComponent {
           <Text style={styles.title}>快速入口</Text>
           <View style={styles.buttonItem}>
             <View style={styles.buttonWrap}>
-              <Button style={styles.button}>四要素更新({this._getValueByStatus("needChange")})</Button>
+              <Button style={styles.button}
+                      onPress={this.handleButtonClick.bind(this, "needChange", this.day)}
+              >
+                四要素更新({this._getValueByStatus("needChange")})
+              </Button>
             </View>
             <View style={styles.buttonWrap}>
-              <Button style={styles.button}>补出库单({this._getValueByStatus("noSales")})</Button>
+              <Button style={styles.button}
+                      onPress={this.handleButtonClick.bind(this, "noSales", this.day)}
+              >
+                补出库单({this._getValueByStatus("noSales")})
+              </Button>
             </View>
           </View>
           <View style={styles.buttonItem}>
             <View style={styles.buttonWrap}>
-              <Button style={styles.button}>无法识别({this._getValueByStatus("noInvoice")})</Button>
+              <Button style={styles.button}
+                      onPress={this.handleButtonClick.bind(this, "noInvoice", this.day)}
+              >
+                无法识别({this._getValueByStatus("noInvoice")})
+              </Button>
             </View>
             <View style={styles.buttonWrap}>
-              <Button style={styles.button}>7天未查到({this._getValueByStatus("failed")})</Button>
+              <Button style={styles.button}
+                      onPress={this.handleButtonClick.bind(this, "failed", this.day)}
+              >
+                7天未查到({this._getValueByStatus("failed")})
+              </Button>
             </View>
           </View>
-          <Button type="warning" style={styles.buttonCenter}>查询中({this._getValueByStatus("waiting")})</Button>
+          <Button type="warning"
+                  style={styles.buttonCenter}
+                  onPress={this.handleButtonClick.bind(this, "waiting", this.day)}
+          >
+            查询中({this._getValueByStatus("waiting")})
+          </Button>
         </View>
 
         <View style={styles.footer}>
@@ -166,10 +195,16 @@ class Home extends PureComponent {
           <Button
             activeOpacity={1}
             style={{width: 100}}
-            onPress={this.props.navigation.navigate.bind(this, 'InvoiceList')}
+            onPress={this.handleButtonClick.bind(this, "", "")}
           >
             发票列表
           </Button>
+          {/*<Button
+            activeOpacity={1}
+            onPress={this.props.navigation.navigate.bind(this, 'Camera2')}
+          >
+            相机
+          </Button>*/}
         </View>
 
         {

@@ -1,8 +1,3 @@
-/**
- * Created by marno on 2017/4/13
- * Function:
- * Desc:
- */
 import React, {Component} from "react";
 import {
   View,
@@ -16,6 +11,7 @@ import Camera from 'react-native-camera';
 import {QRScannerView} from 'ac-qrcode';
 import Spinner from '../../component/spinner';
 import fetch from '../../service/fetch';
+import {session} from '../../service/auth';
 
 export default class DefaultScreen extends Component {
   constructor(props) {
@@ -30,7 +26,7 @@ export default class DefaultScreen extends Component {
         type: Camera.constants.Type.back,
         orientation: Camera.constants.Orientation.auto,
         flashMode: Camera.constants.FlashMode.auto,
-        captureQuality: Camera.constants.CaptureQuality.low
+        captureQuality: Camera.constants.CaptureQuality.medium
       },
       captureImgURI: null,
       loaded: true
@@ -47,8 +43,8 @@ export default class DefaultScreen extends Component {
     this.setState({
       loaded: false
     });
-    fetch.post("uploadSales", {file: this.state.captureImgURI}).then(data => {
-      if( data.success ){
+    fetch.post("upload", {customer: session.get().id, file: this.state.captureImgURI}).then(data => {
+      if( data === true ){
         Toast.show("上传成功");
         this.captureResume();
       } else {
@@ -128,7 +124,7 @@ export default class DefaultScreen extends Component {
            :
         <View style={styles.capturePreview}>
           <Image
-            source={{uri: captureImgURI}}
+            source={{uri: "data:image/jpg;base64," + captureImgURI}}
             style={styles.previewImg}
           />
           <View style={styles.resultActions}>
@@ -188,7 +184,7 @@ export default class DefaultScreen extends Component {
       this.camera.capture()
         .then((res) => {
           this.setState({
-            captureImgURI: "data:image/jpg;base64," + res.data
+            captureImgURI: res.data
           });
         })
         .catch(err => Toast.show("拍照出错，请重试！"));

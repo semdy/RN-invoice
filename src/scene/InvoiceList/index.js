@@ -13,7 +13,8 @@ import Icon from '../../component/icon';
 import Header from '../../component/header';
 import Button from '../../component/button';
 import FormItem from '../../component/formitem';
-import CheckBox from 'react-native-check-box'
+import CheckBox from 'react-native-check-box';
+import Spinner from '../../component/spinner';
 import {confirm} from '../../utils';
 
 import Toast from 'react-native-root-toast';
@@ -36,6 +37,7 @@ class InvoiceList extends PureComponent {
     super(props);
     this.state = {
       loaded: false,
+      isDeling: false,
       invoiceDay: "",
       invoiceStatus: "",
       data: []
@@ -62,16 +64,16 @@ class InvoiceList extends PureComponent {
       number: items.map(item => item.number)
     };
     this.setState({
-      loaded: false
+      isDeling: true
     });
     fetch.post("delInvoice", params).then(data => {
-      if( data.success ) {
+      if( data === true ) {
         this.handleQuery();
       } else {
         Toast.show("删除失败: " + (data.message||""));
       }
       this.setState({
-        loaded: true
+        isDeling: false
       });
     }, (errMsg) => {
       Toast.show(errMsg);
@@ -93,9 +95,7 @@ class InvoiceList extends PureComponent {
     let params = {customer: session.get().id, invoiceNumber, status, day, page};
     fetch.get("invoiceList", params).then(data => {
       this.setState({
-        data: isAppend ? this.state.data.concat(data) : data
-      });
-      this.setState({
+        data: isAppend ? this.state.data.concat(data) : data,
         loaded: true
       });
     });
@@ -141,11 +141,17 @@ class InvoiceList extends PureComponent {
   }
 
   componentDidMount(){
-    this.fetchData();
+    const {params} = this.props.navigation.state;
+    this.setState({
+      invoiceStatus: params.status || "",
+      invoiceDay: params.day === undefined ? "" : String(params.day)
+    }, () => {
+      this.handleQuery();
+    });
   }
 
   render() {
-    let {loaded, data} = this.state;
+    let {loaded, isDeling, data} = this.state;
     return (
       <View style={styles.container}>
         <Header
@@ -206,7 +212,10 @@ class InvoiceList extends PureComponent {
               onEndReached={this.appendData.bind(this)}
             />
           </View>
-
+          {
+            isDeling &&
+            <Spinner/>
+          }
         </View>
 
         <View style={styles.footer}>

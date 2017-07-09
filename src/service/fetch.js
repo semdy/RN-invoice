@@ -18,18 +18,29 @@ function formatParam(params){
 let fetchApi = (url, params) => {
   return new Promise((resolve, reject) => {
     if(typeof params.body === 'object'){
-      params.body = formatParam(params.body);
+      if( params.method === 'GET' ) {
+        params.body = formatParam(params.body);
+      } else {
+        params.body = JSON.stringify(params.body);
+      }
     }
     params.headers = {
-      "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8"
+      "Content-Type": "application/json;charset=UTF-8"
     };
     if( params.method === 'GET' ){
       url += ("?" + params.body + "&r=" + Math.random()*1e20 + Date.now());
       delete params.body;
     }
     return fetch(serverUrl + "api/" + url, params)
-      .then(response => response.json())
+      .then(res => {
+        if( res === "false" || res === false || res === "error" ){
+          throw 'server error';
+        } else {
+          return res.json();
+        }
+      })
       .then(data => {
+        console.log(data);
         resolve(data);
       })
       .catch(err => {

@@ -144,7 +144,7 @@ const dataSource2 = [
     key: "tax"
   }];
 
-const FILE_PATH_PREFIX = serverUrl + "/data/wwwroot/wxfp.qtdatas.com/cdn/app/";
+const FILE_PATH_PREFIX = serverUrl;
 
 function getValueByKey(data, keys){
   let result = data;
@@ -185,7 +185,7 @@ class Detail extends PureComponent {
       this.setState({
         loaded: true
       });
-      if( data.success ) {
+      if( data === true ) {
         this.props.navigation.navigate("InvoiceList");
       } else {
         Toast.show("删除失败: " + (data.message||""));

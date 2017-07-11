@@ -17,10 +17,10 @@ export const login = (username, password) => {
 
 export const session = {
   sessionInfo: {
-   /* name: "系统管理员",
+    name: "系统管理员",
     username: "admin",
     id: "59280dd72001a64700fee81d",
-    role: 2*/
+    role: 2
   },
   set(info){
     this.sessionInfo = info;

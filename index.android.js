@@ -4,18 +4,7 @@
  * @flow
  */
 
-import React, { PureComponent } from 'react'
 import { AppRegistry } from 'react-native'
-
 import RootScene from './src/RootScene';
 
-export default class Invoice extends PureComponent {
-  render() {
-    return (
-      <RootScene />
-    );
-  }
-}
-
-
-AppRegistry.registerComponent('invoice', () => Invoice);
+AppRegistry.registerComponent('invoice', () => RootScene);

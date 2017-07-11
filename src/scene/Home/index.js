@@ -12,7 +12,7 @@ import Icon from '../../component/icon';
 import Header from '../../component/header';
 import Button from '../../component/button';
 import ButtonGroup from '../../component/buttongroup';
-import PercentageCircle from '../../component/percentagecircle';
+import ProgressCircle from 'react-native-progress-circle';
 import Spinner from '../../component/spinner';
 import Toast from 'react-native-root-toast';
 
@@ -119,13 +119,16 @@ class Home extends PureComponent {
           <Text style={styles.title}>发票上传情况</Text>
           <View style={styles.topWrap}>
             <View style={styles.circle}>
-              <PercentageCircle
+              <ProgressCircle
+                percent={data.statusTotal.length/6*100}
                 radius={50}
-                percent={data.statusTotal.length/5*100}
-                color={"#3498db"}
+                borderWidth={4}
+                color="#f0ad4e"
+                shadowColor="#e3e3e3"
+                bgColor="#fff"
               >
-                <Text style={{fontSize: 16}}>{data.statusTotal.length}/5</Text>
-              </PercentageCircle>
+                <Text style={{fontSize:18}}>{data.statusTotal.length}/6</Text>
+              </ProgressCircle>
             </View>
             <View style={styles.buttonGroupWrap}>
               <ButtonGroup
@@ -199,12 +202,12 @@ class Home extends PureComponent {
           >
             发票列表
           </Button>
-          {/*<Button
+          <Button
             activeOpacity={1}
             onPress={this.props.navigation.navigate.bind(this, 'Camera2')}
           >
             相机
-          </Button>*/}
+          </Button>
         </View>
 
         {

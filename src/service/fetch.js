@@ -28,7 +28,7 @@ let fetchApi = (url, params) => {
       "Content-Type": "application/json;charset=UTF-8"
     };
     if( params.method === 'GET' ){
-      url += ("?" + params.body + "&r=" + Math.random()*1e20 + Date.now());
+      url += ("?" + params.body + "&_=" + Math.random()*1e20 + Date.now());
       delete params.body;
     }
     return fetch(serverUrl + "api/" + url, params)

@@ -119,10 +119,8 @@ class HomeScreen extends Component {
         this._navigateToScreen('QQBrowser');
     }
     _navigatorToDefault(){
-        this._navigateToScreen('Default1');
+        this._navigateToScreen('Default');
     }
-
-
 }
 
 const styles = StyleSheet.create({
@@ -158,19 +156,31 @@ const styles = StyleSheet.create({
 });
 
 
-const App = StackNavigator(
+const Navigator = StackNavigator(
     {
-        Home: {screen: HomeScreen,},
+        Home: {screen: HomeScreen},
         WeChat: {screen: WeChatScreen},
         Twitter: {screen: TwitterScreen},
         OFO: {screen: OFOScreen},
         QQBrowser: {screen: QQBrowserScreen},
-        Default1:{screen:DefaultScreen},
+        Default:{screen:DefaultScreen}
     },
     {
-        headerMode: 'none',
+        headerMode: 'none'
     }
 );
+
+class App extends Component {
+  constructor() {
+    super();
+  }
+
+  render() {
+    return (
+      <Navigator/>
+    );
+  }
+}
 
 
 export default App;

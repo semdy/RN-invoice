@@ -8,7 +8,7 @@ import {
 
 import Toast from 'react-native-root-toast';
 import Camera from 'react-native-camera';
-import {QRScannerView} from 'ac-qrcode';
+import {QRScannerView} from '../../component/qrscanner';
 import Spinner from '../../component/spinner';
 import fetch from '../../service/fetch';
 import {session} from '../../service/auth';
@@ -68,7 +68,7 @@ export default class DefaultScreen extends Component {
         {
           !captureImgURI ?
         <View style={styles.cameraWrap}>
-            <Camera
+            {/*<Camera
               ref={(cam) => {
                 this.camera = cam;
               }}
@@ -81,7 +81,7 @@ export default class DefaultScreen extends Component {
               captureQuality={this.state.camera.captureQuality}
               defaultTouchToFocus
               mirrorImage={false}
-            />
+            />*/}
             <QRScannerView
               rectStyle={{right: 30, top: 60}}
               rectHeight={80}
@@ -192,8 +192,8 @@ export default class DefaultScreen extends Component {
   }
 
   barcodeReceived(e) {
-    Toast.show('Type: ' + e.type + '\nData: ' + e.data);
-    this.takePicture();
+    alert('Type: ' + e.type + '\nData: ' + e.data);
+    //this.takePicture();
   }
 }
 

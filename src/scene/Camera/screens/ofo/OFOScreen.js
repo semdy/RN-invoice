@@ -6,7 +6,7 @@
 import React, {Component} from "react";
 import {Text, View} from "react-native";
 import Toast from 'react-native-root-toast';
-import {QRScannerView} from 'ac-qrcode';
+import {QRScannerView} from '../../../../component/qrscanner';
 
 import {ImageButton, TitleBar} from "../../component";
 

@@ -13,7 +13,7 @@ import Icon from '../../component/icon';
 import Header from '../../component/header';
 import Button from '../../component/button';
 import FormItem from '../../component/formitem';
-import CheckBox from 'react-native-check-box';
+import CheckBox from '../../component/checkbox';
 import Spinner from '../../component/spinner';
 import {confirm} from '../../utils';
 

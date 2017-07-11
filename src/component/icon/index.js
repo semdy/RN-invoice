@@ -28,6 +28,8 @@ function genIconPath(props){
       return require('../../img/arrow-right-white.png');
     case 'camera_1':
       return require('../../img/camera_1.png');
+    case 'close':
+      return require('../../img/close.png');
   }
 }
 
@@ -45,8 +47,8 @@ class Icon extends PureComponent{
     path: PropTypes.string,
     name: PropTypes.string,
     size: PropTypes.string,
-    style: PropTypes.object,
-    iconStyle: PropTypes.object,
+    style: PropTypes.any,
+    iconStyle: PropTypes.any,
     onPress: PropTypes.func
   };
 

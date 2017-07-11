@@ -123,7 +123,7 @@ class Home extends PureComponent {
                 percent={data.statusTotal.length/6*100}
                 radius={50}
                 borderWidth={4}
-                color="#f0ad4e"
+                color="#38adff"
                 shadowColor="#e3e3e3"
                 bgColor="#fff"
               >
@@ -178,6 +178,7 @@ class Home extends PureComponent {
           </View>
           <Button type="warning"
                   style={styles.buttonCenter}
+                  numberOfLines={2}
                   onPress={this.handleButtonClick.bind(this, "waiting", this.day)}
           >
             查询中({this._getValueByStatus("waiting")})
@@ -202,12 +203,12 @@ class Home extends PureComponent {
           >
             发票列表
           </Button>
-          <Button
+          {/*<Button
             activeOpacity={1}
             onPress={this.props.navigation.navigate.bind(this, 'Camera2')}
           >
             相机
-          </Button>
+          </Button>*/}
         </View>
 
         {

@@ -8,6 +8,7 @@ import Camera2 from './scene/Camera/indexList'
 import MyInfo from './scene/MyInfo'
 import InvoiceList from './scene/InvoiceList'
 import Detail from './scene/Detail'
+import ImageViewer from './scene/Detail/ImageViewer';
 
 class RootScene extends PureComponent {
   constructor() {
@@ -37,6 +38,9 @@ const Navigator = StackNavigator(
     },
     Detail: {
       screen: Detail
+    },
+    ImageViewer: {
+      screen: ImageViewer
     },
     Camera: {
       screen: Camera

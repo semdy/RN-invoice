@@ -16,14 +16,14 @@ const colorMap = {
 
 class Button extends PureComponent {
   render() {
-    let {disabled, onPress, style, activeOpacity, type} = this.props;
+    let {disabled, onPress, style, activeOpacity, type, numberOfLines} = this.props;
     return (
     <TouchableOpacity
       onPress={onPress}
       style={[styles.button, {backgroundColor: colorMap[type]}, disabled && styles.disabled, style]}
       activeOpacity={activeOpacity}
     >
-      <Text style={styles.text}>
+      <Text style={styles.text} numberOfLines={numberOfLines}>
       {
         this.props.children
       }
@@ -58,7 +58,8 @@ Button.defaultProps = {
   onPress: function(){},
   style: {},
   type: 'primary',
-  activeOpacity: 0.8
+  activeOpacity: 0.8,
+  numberOfLines: 0
 };
 
 Button.propTypes = {
@@ -66,7 +67,8 @@ Button.propTypes = {
   onPress: PropTypes.func,
   style: PropTypes.any,
   type: PropTypes.string,
-  activeOpacity: PropTypes.number
+  activeOpacity: PropTypes.number,
+  numberOfLines: PropTypes.number
 };
 
 export default Button;

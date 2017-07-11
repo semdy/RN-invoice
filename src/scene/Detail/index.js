@@ -4,13 +4,14 @@ import {
   Text,
   Image,
   StyleSheet,
-  Dimensions
+  Dimensions,
+  TouchableWithoutFeedback
 } from 'react-native';
 
 import Icon from '../../component/icon';
 import Header from '../../component/header';
 import Button from '../../component/button';
-import Lightbox from 'react-native-lightbox';
+import ImageViewer from 'react-native-image-zoom-viewer';
 import Spinner from '../../component/spinner';
 import ScrollableTabView from 'react-native-scrollable-tab-view';
 
@@ -18,6 +19,7 @@ import ListTable from './ListTable';
 import fetch, {serverUrl} from '../../service/fetch';
 import {confirm} from '../../utils';
 import Toast from 'react-native-root-toast';
+
 
 const dataSource1 = [
   {
@@ -195,22 +197,16 @@ class Detail extends PureComponent {
     });
   }
 
-  handleOpen(){
-    this.setState({
-      viewHeight: Dimensions.get('window').height,
-      fillMode: 'contain'
-    });
-  }
-
-  handleClose(){
-    this.setState({
-      viewHeight: 100,
-      fillMode: 'cover'
-    });
-  }
-
   handleCamClick(){
     this.props.navigation.navigate('Camera');
+  }
+
+  handleGoBack(){
+    this.props.navigation.goBack();
+  }
+
+  showPhoto(){
+    this.props.navigation.navigate('ImageViewer', {images: [{url: FILE_PATH_PREFIX + this.state.picturePath}]});
   }
 
   fetchData(invoice, number){
@@ -250,7 +246,7 @@ class Detail extends PureComponent {
       <View style={styles.container}>
         <Header
           left={(
-            <Icon name="arrow-left-white" onPress={this.props.navigation.navigate.bind(this,'InvoiceList')}/>
+            <Icon name="arrow-left-white" onPress={this.handleGoBack.bind(this)}/>
           )}
         >
           发票详情
@@ -260,16 +256,15 @@ class Detail extends PureComponent {
           {
             this.state.picturePath ?
             <View style={styles.viewContainer}>
-              <Lightbox
-                onOpen={this.handleOpen.bind(this)}
-                onClose={this.handleClose.bind(this)}
+              <TouchableWithoutFeedback
+                onPress={this.showPhoto.bind(this)}
               >
                 <Image
                   style={{height: this.state.viewHeight}}
                   resizeMode={this.state.fillMode}
                   source={{uri: FILE_PATH_PREFIX + this.state.picturePath}}
                 />
-              </Lightbox>
+              </TouchableWithoutFeedback>
             </View> :
             <Text>
             </Text>

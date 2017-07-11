@@ -68,7 +68,7 @@ export default class DefaultScreen extends Component {
         {
           !captureImgURI ?
         <View style={styles.cameraWrap}>
-            {/*<Camera
+            <Camera
               ref={(cam) => {
                 this.camera = cam;
               }}
@@ -81,7 +81,7 @@ export default class DefaultScreen extends Component {
               captureQuality={this.state.camera.captureQuality}
               defaultTouchToFocus
               mirrorImage={false}
-            />*/}
+            />
             <QRScannerView
               rectStyle={{right: 30, top: 60}}
               rectHeight={80}
@@ -193,7 +193,7 @@ export default class DefaultScreen extends Component {
 
   barcodeReceived(e) {
     alert('Type: ' + e.type + '\nData: ' + e.data);
-    //this.takePicture();
+    this.takePicture();
   }
 }
 

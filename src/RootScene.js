@@ -4,7 +4,7 @@ import { StackNavigator } from 'react-navigation';
 import Login from './scene/Login'
 import Home from './scene/Home'
 import Camera from './scene/Camera'
-import Camera2 from './scene/Camera/indexList'
+import Camera2 from './scene/Camera/kit'
 import MyInfo from './scene/MyInfo'
 import InvoiceList from './scene/InvoiceList'
 import Detail from './scene/Detail'

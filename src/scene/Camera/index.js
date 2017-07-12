@@ -17,7 +17,7 @@ export default class DefaultScreen extends Component {
   constructor(props) {
     super(props);
 
-    this.camera = null;
+    this.scanview = null;
 
     this.state = {
       camera: {
@@ -68,10 +68,20 @@ export default class DefaultScreen extends Component {
         {
           !captureImgURI ?
         <View style={styles.cameraWrap}>
-            <Camera
-              ref={(cam) => {
-                this.camera = cam;
+            <QRScannerView
+              ref={(scanview) => {
+                this.scanview = scanview;
               }}
+              rectStyle={{right: 30, top: 60}}
+              rectHeight={80}
+              rectWidth={80}
+              cornerBorderWidth={2}
+              scanBarHeight={1}
+              scanBarVertical={true}
+              onBarCodeRead={this.barcodeReceived.bind(this)}
+              renderTopBarView={() => this._renderTitleBar()}
+              renderBottomMenuView={() => this._renderMenu()}
+
               style={styles.preview}
               aspect={this.state.camera.aspect}
               captureTarget={this.state.camera.captureTarget}
@@ -79,19 +89,8 @@ export default class DefaultScreen extends Component {
               orientation={this.state.camera.orientation}
               flashMode={this.state.camera.flashMode}
               captureQuality={this.state.camera.captureQuality}
-              defaultTouchToFocus
+              defaultTouchToFocus={true}
               mirrorImage={false}
-            />
-            <QRScannerView
-              rectStyle={{right: 30, top: 60}}
-              rectHeight={80}
-              rectWidth={80}
-              cornerBorderWidth={2}
-              scanBarHeight={1}
-              scanBarVertical={true}
-              onScanResultReceived={this.barcodeReceived.bind(this)}
-              renderTopBarView={() => this._renderTitleBar()}
-              renderBottomMenuView={() => this._renderMenu()}
             />
             <View style={styles.outsideCorner}>
               <View style={[styles.corner, {
@@ -180,8 +179,8 @@ export default class DefaultScreen extends Component {
   }
 
   takePicture() {
-    if (this.camera) {
-      this.camera.capture()
+    if (this.scanview) {
+      this.scanview.camera.capture()
         .then((res) => {
           this.setState({
             captureImgURI: res.data

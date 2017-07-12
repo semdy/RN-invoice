@@ -203,12 +203,12 @@ class Home extends PureComponent {
           >
             发票列表
           </Button>
-          {/*<Button
+          <Button
             activeOpacity={1}
             onPress={this.props.navigation.navigate.bind(this, 'Camera2')}
           >
             相机
-          </Button>*/}
+          </Button>
         </View>
 
         {

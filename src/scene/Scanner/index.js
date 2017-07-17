@@ -188,9 +188,6 @@ export default class DefaultScreen extends Component {
     if (ret.length < 3) {
       isExpectQrcode = false;
     }
-    else if( ret[0] !== '01' || ret[1] !== '01' || ret[1] !== '04' ){
-      return alert("请扫描增值税发票");
-    }
     else if (ret[2].length < 10) {
       isExpectQrcode = false;
     }

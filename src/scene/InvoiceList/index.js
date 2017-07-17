@@ -23,13 +23,22 @@ import fetch from '../../service/fetch';
 import {session} from '../../service/auth';
 
 const INVOICE_STATUS = {
-  "success": "成功",
-  "needChange": "四要素需更新",
-  "noInvoice": "无法识别",
-  "failed": "七天未查到",
-  "noSales": "补出库单",
-  "waiting": "查询中"
+  "success": {text: "已完成", color: "green"},
+  "needChange": {text: "信息需要更新", color: "#f90"},
+  "noInvoice": {text: "无法识别", color: "#cc0000"},
+  "failed": {text: "查询无结果", color: "#cc0000"},
+  "noSales": {text: "销货明细需补充", color: "#f90"},
+  "waiting": {text: "查询中", color: "#666"}
 };
+
+function padZero(n){
+  return n < 10 ? "0" + n : n;
+}
+
+function getCurrentDate(){
+  let date = new Date();
+  return date.getFullYear() + "/" + padZero(date.getMonth() + 1) + "/" + padZero(date.getDate());
+}
 
 class InvoiceList extends PureComponent {
 
@@ -40,7 +49,8 @@ class InvoiceList extends PureComponent {
       isDeling: false,
       invoiceDay: "",
       invoiceStatus: "",
-      data: []
+      data: [],
+      total: 0
     };
     this.page = 1;
   }
@@ -52,7 +62,9 @@ class InvoiceList extends PureComponent {
 
   handleDel(){
     let checkedItems = this.state.data.filter(item => item.checked === true);
-    if( checkedItems.length === 0 ) return Toast.show("请至少选择一项");
+    if( checkedItems.length === 0 )
+      return Toast.show("请至少选择一项");
+
     confirm("确定要删除吗?").then(() => {
       this.doDel(checkedItems);
     }, function(){});
@@ -80,10 +92,6 @@ class InvoiceList extends PureComponent {
     });
   }
 
-  handleCamClick(){
-    this.props.navigation.navigate('Camera');
-  }
-
   handleCheck(item, isChecked){
     item.checked = isChecked;
   }
@@ -92,10 +100,19 @@ class InvoiceList extends PureComponent {
     this.setState({
       loaded: false
     });
-    let params = {customer: session.get().id, invoiceNumber, status, day, page};
+
+    let params = {
+      customer: session.get().id,
+      invoiceNumber,
+      status,
+      day,
+      page
+    };
+
     fetch.get("invoiceList", params).then(data => {
       this.setState({
-        data: isAppend ? this.state.data.concat(data) : data,
+        data: isAppend ? this.state.data.concat(data.invoiceList) : data.invoiceList,
+        total: data.sum,
         loaded: true
       });
     });
@@ -112,10 +129,15 @@ class InvoiceList extends PureComponent {
 
   renderHeader(){
     return (
-      <View style={[styles.tableRow, styles.tableHeader]}>
-        <Text style={styles.lineNumber}>序号</Text>
-        <Text style={styles.tableCell}>发票号</Text>
-        <Text style={styles.tableCell}>状态</Text>
+      <View>
+        <View style={[styles.tableRow, styles.tableHeader]}>
+          <Text style={[styles.lineNumber, {textAlign: 'left'}]}>序号</Text>
+          <Text style={styles.tableCell}>发票号</Text>
+          <Text style={[styles.tableCell, styles.cellStatus]}>状态</Text>
+        </View>
+        {/*<Text style={styles.dateStyle}>
+          {getCurrentDate()}
+        </Text>*/}
       </View>
     );
   }
@@ -128,20 +150,35 @@ class InvoiceList extends PureComponent {
         activeOpacity={0.7}
         onPress={this.props.navigation.navigate.bind(this, 'Detail', item)}
       >
-        <CheckBox
-          style={styles.checkbox}
-          onClick={this.handleCheck.bind(this, item)}
-          isChecked={false}
-        />
-        <Text style={styles.lineNumber}>{item.number}</Text>
+        <View style={[styles.lineNumber, {paddingVertical: 4}]}>
+          <CheckBox
+            style={styles.checkbox}
+            onClick={this.handleCheck.bind(this, item)}
+            isChecked={false}
+          />
+          <Text>{item.number}</Text>
+        </View>
         <Text style={styles.tableCell}>{item.invoiceNumber}</Text>
-        <Text style={styles.tableCell}>{INVOICE_STATUS[item.invoice.status]||"-"}</Text>
+        <Text style={[styles.tableCell, styles.cellStatus, {color: INVOICE_STATUS[item.invoice.status].color}]}>
+          {INVOICE_STATUS[item.invoice.status].text}
+        </Text>
       </TouchableOpacity>
     )
   }
 
+  renderFooter(){
+    return (
+      <View style={styles.queryFooter}>
+        <Text style={{fontSize: 12}}>
+         查询结果: {this.state.total}条
+        </Text>
+      </View>
+    )
+  }
+
   componentDidMount(){
-    const {params} = this.props.navigation.state;
+    let {params} = this.props.navigation.state;
+    params = params || {};
     this.setState({
       invoiceStatus: params.status || "",
       invoiceDay: params.day === undefined ? "" : String(params.day)
@@ -163,12 +200,30 @@ class InvoiceList extends PureComponent {
         </Header>
         <View style={styles.queryContainer}>
           <View style={styles.queryItem}>
-            <FormItem ref="code" placeholder="请输入发票号码" style={styles.code}/>
-            <Button onPress={this.handleQuery.bind(this)} style={styles.button}>查询</Button>
-            <Button type="danger" onPress={this.handleDel.bind(this)} style={styles.button}>删除</Button>
+            <Button
+              onPress={this.handleQuery.bind(this)}
+              style={[{flex: 1}, styles.button]}
+            >
+              查询
+            </Button>
+            <Icon name="delete"
+                  onPress={this.handleDel.bind(this)}
+                  style={styles.button}
+            >
+              删除
+            </Icon>
           </View>
 
           <View style={styles.queryItem}>
+            <Text style={styles.queryLabel}>
+              输入发票号码:
+            </Text>
+            <FormItem ref="code" placeholder="请输入发票号码" style={styles.code}/>
+          </View>
+          <View style={styles.queryItem}>
+            <Text style={styles.queryLabel}>
+              输入查询区间:
+            </Text>
             <View style={styles.pickerItem}>
               <Picker
                 style={styles.picker}
@@ -180,59 +235,52 @@ class InvoiceList extends PureComponent {
                 <Picker.Item label="30天" value="30" />
               </Picker>
             </View>
-            <View style={[styles.pickerItem, {marginLeft: 10}]}>
+          </View>
+          <View style={styles.queryItem}>
+            <Text style={styles.queryLabel}>
+              选择发票状态:
+            </Text>
+            <View style={styles.pickerItem}>
               <Picker
                 style={styles.picker}
                 selectedValue={this.state.invoiceStatus}
                 onValueChange={(value) => this.setState({invoiceStatus: value})}>
                 <Picker.Item label="全部" value="" />
                 <Picker.Item label="查询中" value="waiting" />
-                <Picker.Item label="7天未查到" value="failed" />
-                <Picker.Item label="补出库单" value="noSales" />
-                <Picker.Item label="四要素需更新" value="needChange" />
+                <Picker.Item label="查询无结果" value="failed" />
+                <Picker.Item label="销货明细需补充" value="noSales" />
+                <Picker.Item label="信息需更新" value="needChange" />
                 <Picker.Item label="无法识别" value="noInvoice" />
                 <Picker.Item label="成功" value="success" />
               </Picker>
             </View>
           </View>
+        </View>
 
-          <View style={styles.listViewContainer}>
-            {
-              this.renderHeader()
-            }
-            <FlatList
-              style={styles.scrollview}
-              data={data}
-              keyExtractor={this.keyExtractor}
-              onRefresh={this.handleQuery.bind(this)}
-              refreshing={!loaded}
-              onEndReachedThreshold={0.01}
-              //ListHeaderComponent={this.renderHeader}
-              renderItem={this.renderItem.bind(this)}
-              onEndReached={this.appendData.bind(this)}
-            />
-          </View>
+        <View style={styles.listViewContainer}>
           {
-            isDeling &&
-            <Spinner/>
+            this.renderHeader()
+          }
+          <FlatList
+            style={styles.scrollview}
+            data={data}
+            keyExtractor={this.keyExtractor}
+            onRefresh={this.handleQuery.bind(this)}
+            refreshing={!loaded}
+            onEndReachedThreshold={0.01}
+            //ListHeaderComponent={this.renderHeader}
+            renderItem={this.renderItem.bind(this)}
+            onEndReached={this.appendData.bind(this)}
+          />
+          {
+            this.renderFooter()
           }
         </View>
 
-        <View style={styles.footer}>
-          <Button style={{width: 100}}
-                  onPress={this.props.navigation.navigate.bind(this, 'Home')}
-          >主页</Button>
-          <Icon
-            name="camera_1"
-            style={{padding: 3}}
-            iconStyle={{width: 40, height: 34}}
-            onPress={this.handleCamClick.bind(this)}
-          />
-          <Button
-            style={{width: 100}}
-            onPress={this.handleQuery.bind(this)}
-          >发票列表</Button>
-        </View>
+        {
+          isDeling &&
+          <Spinner/>
+        }
 
       </View>
     );
@@ -241,18 +289,29 @@ class InvoiceList extends PureComponent {
 
 const styles = StyleSheet.create({
   container: {
-    position: "relative",
     flex: 1,
-    backgroundColor: "#fff"
+    backgroundColor: "#d3e1fe"
   },
   queryContainer: {
-    marginTop: 15,
-    marginLeft: 15,
-    marginRight: 15
+    marginHorizontal: 5,
+    marginTop: 10,
+    marginBottom: 5,
+    paddingVertical: 8,
+    paddingHorizontal: 8,
+    backgroundColor: '#fff',
+    borderRadius: 4
+  },
+  formItem: {
+
   },
   queryItem: {
     flexDirection: 'row',
-    marginBottom: 10
+    marginBottom: 5
+  },
+  queryLabel: {
+    height: 38,
+    lineHeight: 29,
+    marginRight: 8
   },
   code: {
     flex: 1,
@@ -271,47 +330,52 @@ const styles = StyleSheet.create({
     marginLeft: 10
   },
   listViewContainer: {
-    borderWidth: 1,
-    borderColor: "#ddd",
+    backgroundColor: '#fff',
     borderRadius: 4,
-    height: Dimensions.get('window').height - 260
+    marginHorizontal: 5,
+    height: Dimensions.get('window').height - 282
   },
   scrollview: {
     flex: 1
   },
+  dateStyle: {
+    paddingVertical: 3,
+    textAlign: 'center'
+  },
   tableRow: {
     flexDirection: 'row',
     borderBottomWidth: 1,
-    borderColor: '#eee'
+    marginHorizontal: 5,
+    borderColor: '#eee',
   },
   tableHeader: {
-    backgroundColor: '#f4f4f4',
-    borderBottomWidth: 1,
-    borderColor: '#eee'
+    borderBottomWidth: 1
   },
   lineNumber: {
-    width: 50,
+    width: 90,
     paddingVertical: 12,
     paddingHorizontal: 8,
-    textAlign: 'center'
+    flexDirection: 'row',
+    alignItems: 'center'
   },
   tableCell: {
     flex: 1,
     textAlign: 'center',
+    paddingHorizontal: 5,
     paddingVertical: 12,
-    paddingHorizontal: 8
+  },
+  cellStatus: {
+    flex: 0,
+    width: 120
   },
   checkbox: {
-    width: 25,
-    marginTop: 10,
-    marginLeft: 5
+    paddingVertical: 8,
+    paddingRight: 8
   },
-  footer: {
-    marginTop: 15,
+  queryFooter: {
+    padding: 8,
     flexDirection: 'row',
-    paddingLeft: 15,
-    paddingRight: 15,
-    justifyContent: 'space-between'
+    justifyContent: 'flex-end'
   }
 });
 

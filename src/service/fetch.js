@@ -33,14 +33,14 @@ let fetchApi = (url, params) => {
     }
     return fetch(serverUrl + "api/" + url, params)
       .then(res => {
-        if( res === "false" || res === false || res === "error" ){
+        if( res === "error" ){
           throw 'server error';
         } else {
           return res.json();
         }
       })
       .then(data => {
-        console.log(data);
+        //console.log(data)
         resolve(data);
       })
       .catch(err => {

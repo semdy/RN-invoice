@@ -16,14 +16,14 @@ const colorMap = {
 
 class Button extends PureComponent {
   render() {
-    let {disabled, onPress, style, activeOpacity, type, numberOfLines} = this.props;
+    let {disabled, onPress, style, textStyle, size, activeOpacity, type, numberOfLines} = this.props;
     return (
     <TouchableOpacity
       onPress={onPress}
-      style={[styles.button, {backgroundColor: colorMap[type]}, disabled && styles.disabled, style]}
+      style={[styles.button, styles[size], {backgroundColor: colorMap[type]}, disabled && styles.disabled, style]}
       activeOpacity={activeOpacity}
     >
-      <Text style={styles.text} numberOfLines={numberOfLines}>
+      <Text style={[styles.text, textStyle]} numberOfLines={numberOfLines}>
       {
         this.props.children
       }
@@ -37,12 +37,20 @@ const styles = StyleSheet.create({
   button: {
     paddingLeft: 15,
     paddingRight: 15,
-    height: 38,
     backgroundColor: "#38adff",
     borderRadius: 4,
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center'
+  },
+  large: {
+    height: 42
+  },
+  normal: {
+    height: 38
+  },
+  small: {
+    height: 26
   },
   disabled: {
     backgroundColor: '#ccc'
@@ -57,7 +65,9 @@ Button.defaultProps = {
   disabled: false,
   onPress: function(){},
   style: {},
+  textStyle: {},
   type: 'primary',
+  size: 'normal',
   activeOpacity: 0.8,
   numberOfLines: 0
 };
@@ -66,7 +76,9 @@ Button.propTypes = {
   disabled: PropTypes.bool,
   onPress: PropTypes.func,
   style: PropTypes.any,
+  textStyle: PropTypes.any,
   type: PropTypes.string,
+  size: PropTypes.string,
   activeOpacity: PropTypes.number,
   numberOfLines: PropTypes.number
 };

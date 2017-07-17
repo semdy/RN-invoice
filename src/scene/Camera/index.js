@@ -2,14 +2,16 @@ import React, {Component} from "react";
 import {
   View,
   Image,
+  Text,
   StyleSheet,
-  TouchableOpacity
+  TouchableOpacity,
+  DeviceEventEmitter
 } from "react-native";
 
 import Toast from 'react-native-root-toast';
 import Camera from 'react-native-camera';
-import {QRScannerView} from '../../component/qrscanner';
 import Spinner from '../../component/spinner';
+import Icon from '../../component/icon';
 import fetch from '../../service/fetch';
 import {session} from '../../service/auth';
 
@@ -17,7 +19,9 @@ export default class DefaultScreen extends Component {
   constructor(props) {
     super(props);
 
-    this.scanview = null;
+    this.camera = null;
+    this.uploadType = "newUpload";
+    this.invoiceInfo = {};
 
     this.state = {
       camera: {
@@ -25,7 +29,7 @@ export default class DefaultScreen extends Component {
         captureTarget: Camera.constants.CaptureTarget.memory,
         type: Camera.constants.Type.back,
         orientation: Camera.constants.Orientation.auto,
-        flashMode: Camera.constants.FlashMode.auto,
+        torchMode: Camera.constants.TorchMode.off,
         captureQuality: Camera.constants.CaptureQuality.medium
       },
       captureImgURI: null,
@@ -39,26 +43,86 @@ export default class DefaultScreen extends Component {
     });
   }
 
-  captureDone(){
+  captureDone( isGoHome ){
     this.setState({
       loaded: false
     });
-    fetch.post("upload", {customer: session.get().id, file: this.state.captureImgURI}).then(data => {
+
+    const thenFun = () => {
+      if( isGoHome ){
+        if( this.uploadType === 'newUpload' ) {
+          this.props.navigation.navigate("Home");
+        } else {
+          this.props.navigation.goBack();
+          DeviceEventEmitter.emit('salesCaptureDone');
+        }
+      }
+    };
+
+    if( this.uploadType === 'newUpload' ){
+      this.uploadInvoice().then(thenFun);
+    } else if( this.uploadType === 'uploadSales' ){
+      this.uploadSales().then(thenFun);
+    }
+  }
+
+  uploadInvoice(){
+    return fetch.post("upload", {customer: session.get().id, file: this.state.captureImgURI}).then(data => {
+      this.setState({
+        loaded: true
+      });
+
       if( data === true ){
         Toast.show("上传成功");
         this.captureResume();
       } else {
-        Toast.show("上传失败 " + (data.message||""));
+        Toast.show("上传失败 ");
       }
-      this.setState({
-        loaded: true
-      });
+
     }, errMsg => {
-      Toast.show("上传失败, 请重试!");
       this.setState({
         loaded: true
       });
+      Toast.show("上传失败, 请重试!");
     });
+  }
+
+  uploadSales(){
+    let params = {
+      number: this.invoiceInfo.number,
+      invoice: this.invoiceInfo.id,
+      file: this.state.captureImgURI
+    };
+    return fetch.post("uploadSales", params).then(data => {
+      this.setState({
+        loaded: true
+      });
+
+      if( data === true ){
+        Toast.show("上传成功");
+        this.captureResume();
+      } else {
+        Toast.show("上传失败 ");
+      }
+
+    }, errMsg => {
+      this.setState({
+        loaded: true
+      });
+      Toast.show("上传失败, 请重试!");
+    });
+  }
+
+  switchToScanner(){
+    this.props.switchMode("scanner");
+  }
+
+  componentWillMount(){
+    const {params} = this.props.navigation.state;
+    if( params ) {
+      this.uploadType = params.uploadType || this.uploadType;
+      this.invoiceInfo = params.invoiceInfo || this.invoiceInfo;
+    }
   }
 
   render() {
@@ -67,28 +131,19 @@ export default class DefaultScreen extends Component {
       <View style={styles.container}>
         {
           !captureImgURI ?
-        <View style={styles.cameraWrap}>
-            <QRScannerView
-              ref={(scanview) => {
-                this.scanview = scanview;
+          <View style={styles.cameraWrap}>
+            <Camera
+              ref={(cam) => {
+                this.camera = cam;
               }}
-              rectStyle={{right: 30, top: 60}}
-              rectHeight={80}
-              rectWidth={80}
-              cornerBorderWidth={2}
-              scanBarHeight={1}
-              scanBarVertical={true}
-              onBarCodeRead={this.barcodeReceived.bind(this)}
-              renderTopBarView={() => this._renderTitleBar()}
-              renderBottomMenuView={() => this._renderMenu()}
-
-              style={styles.preview}
+              style={styles.camera}
               aspect={this.state.camera.aspect}
               captureTarget={this.state.camera.captureTarget}
               type={this.state.camera.type}
               orientation={this.state.camera.orientation}
-              flashMode={this.state.camera.flashMode}
+              torchMode={this.state.camera.torchMode}
               captureQuality={this.state.camera.captureQuality}
+              barCodeTypes={['qr']}
               defaultTouchToFocus={true}
               mirrorImage={false}
             />
@@ -119,36 +174,55 @@ export default class DefaultScreen extends Component {
               }]}/>
               <View style={styles.sealCircle}/>
             </View>
-        </View>
-           :
-        <View style={styles.capturePreview}>
-          <Image
-            source={{uri: "data:image/jpg;base64," + captureImgURI}}
-            style={styles.previewImg}
-          />
-          <View style={styles.resultActions}>
-            <TouchableOpacity
-              activeOpacity={0.9}
-              style={styles.iconButton}
-              onPress={this.captureResume.bind(this)}
-            >
-              <Image
-                source={require('../../img/error.png')}
-                style={styles.imgButton}
-              />
-            </TouchableOpacity>
-            <TouchableOpacity
-              activeOpacity={0.9}
-              style={[styles.iconButton, {marginLeft: 80}]}
-              onPress={this.captureDone.bind(this)}
-            >
-              <Image
-                source={require('../../img/ok.png')}
-                style={styles.imgButton}
-              />
-            </TouchableOpacity>
+            <Icon
+              name="circle-close"
+              size="large"
+              style={styles.iconBack}
+              iconStyle={{width: 50, height: 50}}
+              onPress={this.handleBack.bind(this)}
+            />
+            {this._renderMenu()}
           </View>
-        </View>
+           :
+          <View style={styles.capturePreview}>
+            <Image
+              source={{uri: "data:image/jpg;base64," + captureImgURI}}
+              style={styles.previewImg}
+            />
+            <View style={styles.resultActions}>
+              <TouchableOpacity
+                activeOpacity={0.5}
+                style={styles.iconButton}
+                onPress={this.captureDone.bind(this, true)}
+              >
+                <Text style={styles.imgButton}>完成</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                activeOpacity={0.5}
+                style={styles.iconButton}
+                onPress={this.captureDone.bind(this, false)}
+              >
+                <Text style={styles.imgButton}>下一张</Text>
+              </TouchableOpacity>
+            </View>
+
+            <View style={styles.redoWrap}>
+              <TouchableOpacity
+                activeOpacity={1}
+                style={styles.redoButton}
+                onPress={this.captureResume.bind(this)}
+              >
+                <Text style={styles.redoHint}>模糊不清, 重新拍摄</Text>
+                <Icon
+                  name="redo"
+                  size="large"
+                  style={{padding: 12}}
+                />
+              </TouchableOpacity>
+            </View>
+
+          </View>
         }
         {
           !this.state.loaded &&
@@ -158,29 +232,49 @@ export default class DefaultScreen extends Component {
     )
   }
 
-  _renderTitleBar(){
-
-  }
-
   _renderMenu() {
     return (
       <View style={styles.bottom}>
+        {
+          this.uploadType === "newUpload" ?
+          <Text style={styles.leftAction}
+                onPress={this.switchToScanner.bind(this)}
+          >
+            扫描二维码
+          </Text>
+            :
+          <Text style={[styles.leftAction, {left: 0}]}
+            onPress={this.handleBack.bind(this)}
+          >
+            取消
+          </Text>
+        }
         <TouchableOpacity
-          activeOpacity={0.9}
-          style={styles.iconButton}
+          activeOpacity={0.5}
+          style={styles.outerCircle}
           onPress={this.takePicture.bind(this)}
         >
-          <Image
-            source={require('../../img/camera/ic_photo_camera_36pt.png')}
-          />
+          <View style={styles.innerCircle}/>
         </TouchableOpacity>
+        <Icon name="flash"
+              size="large"
+              style={styles.torchStyle}
+              onPress={this.switchTorchMode.bind(this)}
+        />
       </View>
     )
   }
 
+  switchTorchMode(){
+    this.state.camera.torchMode = this.state.camera.torchMode === 'on' ? 'off' : 'on';
+    this.setState({
+      camera: this.state.camera
+    });
+  }
+
   takePicture() {
-    if (this.scanview) {
-      this.scanview.camera.capture()
+    if (this.camera) {
+      this.camera.capture()
         .then((res) => {
           this.setState({
             captureImgURI: res.data
@@ -190,9 +284,8 @@ export default class DefaultScreen extends Component {
     }
   }
 
-  barcodeReceived(e) {
-    alert('Type: ' + e.type + '\nData: ' + e.data);
-    this.takePicture();
+  handleBack(){
+    this.props.navigation.goBack();
   }
 }
 
@@ -202,16 +295,72 @@ const styles = StyleSheet.create({
   },
   cameraWrap: {
     flex: 1,
-    position: 'relative'
+    position: "relative"
+  },
+  camera: {
+    flex: 1
+  },
+  iconBack: {
+    position: "absolute",
+    left: '50%',
+    top: 5,
+    marginLeft: -25
   },
   bottom: {
+    position: "absolute",
+    left: 0,
+    right: 0,
+    bottom: 0,
     flexDirection: 'row',
-    justifyContent: 'center'
+    justifyContent: 'center',
+    paddingVertical: 5,
+    backgroundColor: 'rgba(0,0,0,.6)'
+  },
+  leftAction: {
+    position: 'absolute',
+    left: -12,
+    top: -6,
+    paddingHorizontal: 3,
+    paddingVertical: 8,
+    borderRadius: 4,
+    color: "#fff",
+    fontSize: 12,
+    transform: [
+      {
+        rotate: "90deg"
+      },
+      {
+        translateX: 23
+      }
+    ]
+  },
+  torchStyle: {
+    position: "absolute",
+    right: 5,
+    top: "50%",
+    marginTop: -20
+  },
+  outerCircle: {
+    width: 55,
+    height: 55,
+    borderWidth: 3,
+    borderColor: '#fff',
+    padding: 3,
+    borderRadius: 80
+  },
+  innerCircle: {
+    flex: 1,
+    backgroundColor: "#3c76fe",
+    borderRadius: 80
   },
   iconButton: {
-    padding: 15,
+    width: 70,
+    height: 70,
+    marginVertical: 30,
+    justifyContent: 'center',
+    alignItems: 'center',
     backgroundColor: '#fff',
-    borderRadius: 40
+    borderRadius: 60
   },
   capturePreview: {
     position: "absolute",
@@ -229,22 +378,44 @@ const styles = StyleSheet.create({
   },
   resultActions: {
     position: 'absolute',
-    left:0,
-    right: 0,
-    bottom: 30,
-    justifyContent: 'center',
-    flexDirection: 'row',
+    left: 20,
+    top: 0,
+    height: "100%",
+    alignItems: 'center',
+    justifyContent: 'center'
   },
   imgButton: {
-    width: 30,
-    height: 30
+    fontSize: 18,
+    fontWeight: 'bold',
+    transform: [
+     {
+      rotate: "90deg"
+     }
+    ]
+  },
+  redoWrap: {
+    position: 'absolute',
+    right: 10,
+    bottom: 30,
+    transform: [
+      {
+        rotate: '90deg'
+      }
+    ]
+  },
+  redoButton: {
+    justifyContent: 'center',
+    alignItems: 'center'
+  },
+  redoHint: {
+    color: '#fff'
   },
   outsideCorner: {
     position: 'absolute',
     left: 20,
     top: 40,
     right: 20,
-    bottom: 60,
+    bottom: 70,
     justifyContent: 'center',
     alignItems: 'flex-end'
   },

@@ -1,1 +1,3 @@
-<resources>    <string name="app_name">invoice</string></resources>
+<resources>
+    <string name="app_name">invoice</string>
+</resources>

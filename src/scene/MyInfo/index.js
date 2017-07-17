@@ -15,6 +15,7 @@ import FormItem from '../../component/formitem';
 import Spinner from '../../component/spinner';
 
 import fetch from '../../service/fetch';
+import {session} from '../../service/auth';
 import Toast from 'react-native-root-toast';
 
 class MyInfo extends PureComponent {
@@ -22,27 +23,29 @@ class MyInfo extends PureComponent {
   constructor(props){
     super(props);
     this.state = {
-      isEditing: false
+      isEditing: false,
+      loaded: false,
+      data: {}
     };
   }
 
   handleSubmit(){
 
-    let customer = this.refs.customer.value;
     let name = this.refs.name.value;
+    let username = this.refs.username.value;
     let email = this.refs.email.value;
     let phone = this.refs.phone.value;
     let password = this.refs.password.value;
     let passwordrm = this.refs.passwordrm.value;
 
-    if(customer.trim() === "") return Toast.show("用户名不能为空");
-    if(name.trim() === "") return Toast.show("真实姓名不能为空");
-    if(email.trim() === "") return Toast.show("邮箱不能为空");
-    if(!/^.+@.+\..+$/.test(email)) return Toast.show("邮箱不合法");
-    if(phone.trim() === "") return Toast.show("手机号不能为空");
-    if(!/^1(3|4|5|7|8|9)\d{9}$/.test(phone)) return Toast.show("手机号不合法");
-    if(password.trim() === "") return Toast.show("密码不能为空");
-    if(passwordrm.trim() === "") return Toast.show("请输入确认密码");
+   /* if(company.trim() === "") return Toast.show("公司名不能为空");
+    if(customer.trim() === "") return Toast.show("用户名不能为空");*/
+    /*if(email.trim() === "") return Toast.show("邮箱不能为空");*/
+    if(email.trim() !== "" && !/^.+@.+\..+$/.test(email)) return Toast.show("邮箱不合法");
+    /*if(phone.trim() === "") return Toast.show("手机号不能为空");*/
+    if(phone.trim() !== "" && !/^1[345789]\d{9}$/.test(phone)) return Toast.show("手机号不合法");
+    /*if(password.trim() === "") return Toast.show("密码不能为空");
+    if(passwordrm.trim() === "") return Toast.show("请输入确认密码");*/
     if(password !== passwordrm) return Toast.show("两次输入的密码不一致");
 
     this.setState({
@@ -51,18 +54,15 @@ class MyInfo extends PureComponent {
 
     fetch.post("upCustomer",
       {
-        customer,
+        customer: session.get().id,
         name,
+        username,
         phone,
         email,
         password
       })
       .then(data => {
-        if( data.success ){
-          Toast.show("修改成功");
-        } else {
-          Toast.show("修改失败: " + (data.message || ""));
-        }
+        Toast.show(data.message);
         this.setState({
           isEditing: false
         });
@@ -74,8 +74,24 @@ class MyInfo extends PureComponent {
     });
   }
 
+  componentDidMount(){
+    fetch.get("getCustomer", {customer: session.get().id}).then(res => {
+      if( res.success ){
+        this.setState({
+          data: res.data,
+          loaded: true
+        });
+      } else {
+        Toast.show("用户信息获取失败");
+        this.setState({
+          loaded: true
+        });
+      }
+    })
+  }
+
   render() {
-    let {isEditing} = this.state;
+    let {isEditing, loaded, data} = this.state;
     return (
       <View style={styles.container}>
         <Header
@@ -83,24 +99,80 @@ class MyInfo extends PureComponent {
             <Icon name="arrow-left-white" onPress={this.props.navigation.navigate.bind(this,'Home')}/>
           )}
         >
-          个人信息
+          用户信息
         </Header>
         <ScrollView style={styles.scrollview}>
           <View style={styles.myinfo}>
-            <FormItem ref="customer" label="用户名" placeholder="请输入用户名"/>
-            <FormItem ref="name" label="真实姓名" placeholder="请输入真实姓名"/>
-            <FormItem ref="email" label="邮箱" placeholder="请输入邮箱"/>
-            <FormItem ref="phone" label="联系电话" placeholder="请输入联系电话"/>
-            <FormItem ref="password" label="新密码" placeholder="请输入新密码" password={true}/>
-            <FormItem ref="passwordrm" label="确认密码" placeholder="请输入确认密码" password={true}/>
+            <View style={styles.formWrap}>
+              <FormItem
+                ref="name"
+                label="公司名称"
+                placeholder="请输入公司名称"
+                style={styles.formitem}
+                labelStyle={styles.labelStyle}
+                inputStyle={styles.inputStyle}
+                defaultValue={data.name}
+              />
+              <FormItem
+                ref="username"
+                label="用户名"
+                placeholder="请输入用户名"
+                style={styles.formitem}
+                labelStyle={styles.labelStyle}
+                inputStyle={styles.inputStyle}
+                defaultValue={data.username}
+              />
+              <FormItem
+                ref="email"
+                label="邮箱"
+                placeholder="请输入邮箱"
+                style={styles.formitem}
+                labelStyle={styles.labelStyle}
+                inputStyle={styles.inputStyle}
+                defaultValue={data.email}
+              />
+              <FormItem
+                ref="phone"
+                label="联系电话"
+                placeholder="请输入联系电话"
+                style={styles.formitem}
+                labelStyle={styles.labelStyle}
+                inputStyle={styles.inputStyle}
+                defaultValue={data.phone}
+              />
+              <FormItem
+                ref="password"
+                label="新密码"
+                placeholder="请输入新密码"
+                password={true}
+                style={styles.formitem}
+                labelStyle={styles.labelStyle}
+                inputStyle={styles.inputStyle}
+              />
+              <FormItem
+                ref="passwordrm"
+                label="确认密码"
+                placeholder="请输入确认密码"
+                password={true}
+                style={[styles.formitem, styles.noborder]}
+                labelStyle={styles.labelStyle}
+                inputStyle={styles.inputStyle}
+              />
+            </View>
             <View style={styles.formActions}>
-              <Button disabled={isEditing} onPress={this.handleSubmit.bind(this)}>修改</Button>
+              <Button
+                style={styles.button}
+                disabled={isEditing}
+                onPress={this.handleSubmit.bind(this)}
+              >
+                修改信息
+              </Button>
             </View>
           </View>
-          <Text style={styles.footer}>阙天票据管理系统</Text>
+          {/*<Text style={styles.footer}>阙天票据管理系统</Text>*/}
         </ScrollView>
         {
-          isEditing&&
+          (isEditing || !loaded)&&
           <Spinner/>
         }
       </View>
@@ -112,35 +184,51 @@ const styles = StyleSheet.create({
   container: {
     position: "relative",
     flex: 1,
-    backgroundColor: "#fff"
+    backgroundColor: "#d3e1fe"
   },
   scrollview: {
     flex: 1
   },
   myinfo: {
-    marginLeft: 'auto',
-    marginRight: 'auto',
-    width: "80%",
-    left: -15,
-    maxWidth: 320,
-    minHeight: Dimensions.get('window').height - 75,
-    paddingTop: 60
+    marginLeft: 5,
+    marginRight: 5,
+    marginTop: 10,
+    minHeight: Dimensions.get('window').height - 85
   },
-  logo: {
-    marginLeft: 'auto',
-    marginRight: 'auto',
-    marginBottom: 35,
-    width: 198,
-    height: 93
+  formWrap: {
+    backgroundColor: '#fff',
+    borderRadius: 4
+  },
+  formitem: {
+    marginBottom: 0,
+    marginHorizontal: 8,
+    borderBottomWidth: 1,
+    borderColor: '#eee'
+  },
+  noborder: {
+    borderColor: 'transparent'
+  },
+  labelStyle: {
+    height: 42
+  },
+  inputStyle: {
+    height: 42,
+    borderWidth: 0,
+    backgroundColor: 'transparent'
   },
   formActions: {
-    marginLeft: 68,
-    marginTop: 10
+    marginTop: 20
+  },
+  button: {
+    width: '70%',
+    maxWidth: 280,
+    marginLeft: 'auto',
+    marginRight: 'auto'
   },
   footer: {
     position: "absolute",
     left: 0,
-    bottom: 40,
+    bottom: 20,
     width: '100%',
     textAlign: 'center',
     fontSize: 18

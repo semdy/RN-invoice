@@ -2,7 +2,8 @@ import React, {PureComponent} from 'react'
 import {
   View,
   Text,
-  StyleSheet
+  StyleSheet,
+  TouchableOpacity
 } from 'react-native';
 
 import fetch from '../../service/fetch';
@@ -11,7 +12,7 @@ import {session} from '../../service/auth';
 import Icon from '../../component/icon';
 import Header from '../../component/header';
 import Button from '../../component/button';
-import ButtonGroup from '../../component/buttongroup';
+import ListItem from '../../component/listitem';
 import ProgressCircle from 'react-native-progress-circle';
 import Spinner from '../../component/spinner';
 import Toast from 'react-native-root-toast';
@@ -21,40 +22,30 @@ class Home extends PureComponent {
   constructor(props) {
     super(props);
     this.state = {
+      authReady: false,
       activeIndex: 0,
       loaded: false,
       data: {
+        sum: 0,
         statusTotal: []
       }
     };
-
     this.day = 1;
-
-    this.buttonItems = [
-      {
-        text: "当天",
-        value: 1
-      },
-      {
-        text: "7天",
-        value: 7
-      },
-      {
-        text: "30天",
-        value: 30
-      },
-      {
-        text: "全部"
-      }];
   }
 
   componentWillMount(){
-    //this.props.navigation.navigate("Login");
-    this.fetchData(this.day);
+    session.load().then(res => {
+      this.setState({
+        authReady: true
+      });
+      this.doRefresh();
+    }, err => {
+      this.props.navigation.navigate("Login");
+    });
   }
 
   doRefresh(){
-    this.fetchData(this.buttonItems[this.state.activeIndex].value);
+    this.fetchData(this.day);
   }
 
   fetchData(day){
@@ -75,16 +66,16 @@ class Home extends PureComponent {
     });
   }
 
-  handleType(i, item){
-    this.day = item.value;
+  handleType(i, value){
+    this.day = value;
     this.setState({
       activeIndex: i
     });
-    this.fetchData(item.value);
+    this.fetchData(value);
   }
 
   handleCamClick(){
-    this.props.navigation.navigate('Camera');
+    this.props.navigation.navigate('ScanCamera', {mode: 'scanner'});
   }
 
   handleSetPress(){
@@ -100,12 +91,19 @@ class Home extends PureComponent {
        return item.status === status;
      });
 
-     return result ? (result.total || 0) : 0
+     return String(result ? (result.total || 0) : 0);
+  }
+
+  _getSuccessCount(data){
+    let ret = data.find(item => item.status === 'success');
+    if( !ret ) return 0;
+    return ret.total;
   }
 
   render() {
-    let {activeIndex, data, loaded} = this.state;
+    let {activeIndex, data, loaded, authReady} = this.state;
     return (
+      authReady &&
       <View style={styles.container}>
         <Header
           left={(
@@ -115,107 +113,113 @@ class Home extends PureComponent {
         >
           主页
         </Header>
-        <View style={styles.topMain}>
-          <Text style={styles.title}>发票上传情况</Text>
-          <View style={styles.topWrap}>
+        <View style={styles.page}>
+          <View style={styles.topMain}>
             <View style={styles.circle}>
               <ProgressCircle
-                percent={data.statusTotal.length/6*100}
+                percent={data.sum === 0 ? 0 : this._getSuccessCount(data.statusTotal)/data.sum*100}
                 radius={50}
-                borderWidth={4}
-                color="#38adff"
-                shadowColor="#e3e3e3"
+                borderWidth={12}
+                color="#4472c4"
+                shadowColor="#b4c7e7"
                 bgColor="#fff"
               >
-                <Text style={{fontSize:18}}>{data.statusTotal.length}/6</Text>
+                <Text style={{fontSize:18}}>{this._getSuccessCount(data.statusTotal) + "/" + data.sum}</Text>
               </ProgressCircle>
             </View>
             <View style={styles.buttonGroupWrap}>
-              <ButtonGroup
-                activeIndex={activeIndex}
-                vertical={true}
-                items={this.buttonItems}
+              <Button
                 size="small"
-                onPress={this.handleType.bind(this)}
+                style={[styles.gbutton, activeIndex === 0 && styles.currentButton]}
+                onPress={this.handleType.bind(this, 0, 1)}
+              >
+                当天
+              </Button>
+              <Button
+                size="small"
+                style={[styles.gbutton, activeIndex === 1 && styles.currentButton]}
+                onPress={this.handleType.bind(this, 1, 7)}
+              >
+                7天
+              </Button>
+              <Button
+                size="small"
+                style={[styles.gbutton, activeIndex === 2 && styles.currentButton]}
+                onPress={this.handleType.bind(this, 2, 30)}
+              >
+                30天
+              </Button>
+              <Button
+                size="small"
+                style={[styles.gbutton, activeIndex === 3 && styles.currentButton]}
+                onPress={this.handleType.bind(this, 3, "")}
+              >
+                全部
+              </Button>
+            </View>
+          </View>
+
+          <View style={styles.entrance}>
+            <ListItem
+              iconName="find"
+              text="查询中"
+              extraText={this._getValueByStatus("waiting")}
+              onPress={this.handleButtonClick.bind(this, "waiting", this.day)}
+            />
+            <ListItem
+              iconName="need-update"
+              text="信息需更新"
+              extraText={this._getValueByStatus("needChange")}
+              onPress={this.handleButtonClick.bind(this, "needChange", this.day)}
+            />
+            <ListItem
+              iconName="list-add"
+              text="销货明细需补充"
+              extraText={this._getValueByStatus("noSales")}
+              onPress={this.handleButtonClick.bind(this, "noSales", this.day)}
+            />
+            <ListItem
+              iconName="file-error"
+              text="查询无结果"
+              extraText={this._getValueByStatus("failed")}
+              onPress={this.handleButtonClick.bind(this, "failed", this.day)}
+            />
+            <ListItem
+              iconName="search-error"
+              text="无法识别"
+              extraText={this._getValueByStatus("noInvoice")}
+              onPress={this.handleButtonClick.bind(this, "noInvoice", this.day)}
+            />
+          </View>
+
+          <View style={styles.footer}>
+            <Icon
+              name="refresh"
+              size="large"
+              style={{marginBottom: 15}}
+              onPress={this.doRefresh.bind(this)}
+            />
+            <TouchableOpacity
+              style={styles.cameraWrap}
+              onPress={this.handleCamClick.bind(this)}
+            >
+              <Icon
+                name="camera-blue"
+                size="large"
               />
-            </View>
+            </TouchableOpacity>
+            <Icon
+              name="detail"
+              size="large"
+              style={{marginBottom: 15}}
+              onPress={this.handleButtonClick.bind(this, "", "")}
+            />
           </View>
         </View>
-
-        <View style={styles.entrance}>
-          <Text style={styles.title}>快速入口</Text>
-          <View style={styles.buttonItem}>
-            <View style={styles.buttonWrap}>
-              <Button style={styles.button}
-                      onPress={this.handleButtonClick.bind(this, "needChange", this.day)}
-              >
-                四要素更新({this._getValueByStatus("needChange")})
-              </Button>
-            </View>
-            <View style={styles.buttonWrap}>
-              <Button style={styles.button}
-                      onPress={this.handleButtonClick.bind(this, "noSales", this.day)}
-              >
-                补出库单({this._getValueByStatus("noSales")})
-              </Button>
-            </View>
-          </View>
-          <View style={styles.buttonItem}>
-            <View style={styles.buttonWrap}>
-              <Button style={styles.button}
-                      onPress={this.handleButtonClick.bind(this, "noInvoice", this.day)}
-              >
-                无法识别({this._getValueByStatus("noInvoice")})
-              </Button>
-            </View>
-            <View style={styles.buttonWrap}>
-              <Button style={styles.button}
-                      onPress={this.handleButtonClick.bind(this, "failed", this.day)}
-              >
-                7天未查到({this._getValueByStatus("failed")})
-              </Button>
-            </View>
-          </View>
-          <Button type="warning"
-                  style={styles.buttonCenter}
-                  numberOfLines={2}
-                  onPress={this.handleButtonClick.bind(this, "waiting", this.day)}
-          >
-            查询中({this._getValueByStatus("waiting")})
-          </Button>
-        </View>
-
-        <View style={styles.footer}>
-          <Button
-            style={{width: 100}}
-            onPress={this.doRefresh.bind(this)}
-          >主页</Button>
-          <Icon
-            name="camera_1"
-            style={{padding: 3}}
-            iconStyle={{width: 40, height: 34}}
-            onPress={this.handleCamClick.bind(this)}
-          />
-          <Button
-            activeOpacity={1}
-            style={{width: 100}}
-            onPress={this.handleButtonClick.bind(this, "", "")}
-          >
-            发票列表
-          </Button>
-          <Button
-            activeOpacity={1}
-            onPress={this.props.navigation.navigate.bind(this, 'Camera2')}
-          >
-            相机
-          </Button>
-        </View>
-
         {
           !loaded &&
           <Spinner/>
         }
-
       </View>
     );
   }
@@ -224,73 +228,58 @@ class Home extends PureComponent {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#ffffff"
+    backgroundColor: "#d3e1fe"
   },
-  title: {
-    marginTop: 20,
-    marginBottom: 20,
-    fontSize: 14,
-    borderLeftWidth: 4,
-    borderColor: "#38adff",
-    paddingLeft: 8
+  page: {
+    flex: 1,
+    paddingHorizontal: 5,
+    paddingVertical: 12
   },
   topMain: {
-    marginLeft: 25,
-    marginRight: 25,
-    marginBottom: 25
-  },
-  topWrap: {
-    position: "relative"
+    flexDirection: 'row',
+    backgroundColor: '#fff',
+    borderRadius: 4,
+    marginBottom: 15,
+    padding: 15
   },
   circle: {
     width: 120,
+    marginTop: 10,
     marginLeft: 'auto',
     marginRight: 'auto'
   },
   buttonGroupWrap: {
-    position: "absolute",
-    top: 0,
-    right: 0,
-    width: 60
+    width: 70
+  },
+  gbutton: {
+    marginBottom: 2,
+    backgroundColor: '#dae3f3'
+  },
+  currentButton: {
+    backgroundColor: "#4472c4"
   },
   entrance: {
-    position: "relative",
-    marginLeft: 25,
-    marginRight: 25,
     marginBottom: 15
   },
-  buttonItem: {
-    flexDirection: 'row',
+  cameraWrap: {
+    width: 80,
+    height: 80,
+    borderRadius: 150,
+    paddingTop: 10,
+    backgroundColor: '#fff',
     justifyContent: 'center',
-    marginBottom: 10
-  },
-  buttonWrap: {
-    width: "50%",
-    paddingLeft: 10
-  },
-  button: {
-    height: 70
-  },
-  buttonCenter: {
-    position: 'absolute',
-    left: '50%',
-    top: '50%',
-    width: 86,
-    height: 86,
-    marginLeft: -40,
-    marginTop: -20,
-    borderWidth: 6,
-    borderColor: '#fff',
-    borderRadius: 45
+    alignItems: 'flex-start',
+    flexDirection: 'row'
   },
   footer: {
     position: 'absolute',
     left: 0,
-    bottom: 25,
+    bottom: -20,
     width: '100%',
     flexDirection: 'row',
     paddingLeft: 35,
     paddingRight: 25,
+    alignItems: 'center',
     justifyContent: 'space-between'
   }
 });

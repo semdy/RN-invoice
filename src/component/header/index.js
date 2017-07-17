@@ -48,7 +48,7 @@ const styles = StyleSheet.create({
     height: 50,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#c00000',
+    backgroundColor: '#0090ff',
     flexDirection: 'row',
     shadowColor: "#000",
     shadowOpacity: 0.25,

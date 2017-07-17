@@ -9,7 +9,8 @@ import {
 
 import Button from '../../component/button';
 import FormItem from '../../component/formitem';
-import {login} from '../../service/auth';
+import LinearGradient from 'react-native-linear-gradient';
+import {login, session} from '../../service/auth';
 
 import Toast from 'react-native-root-toast';
 
@@ -30,8 +31,9 @@ class Login extends PureComponent {
     this.setState({
       isLogining: true
     });
-    login(username, password).then(res => {
-      this.props.navigation.navigate('Home', res);
+    login(username, password).then(userinfo => {
+      session.set(userinfo);
+      this.props.navigation.navigate('Home', userinfo);
     }, errMsg => {
       Toast.show(errMsg);
       this.setState({
@@ -44,15 +46,45 @@ class Login extends PureComponent {
     let {isLogining} = this.state;
     return (
       <View style={styles.container}>
-        <View style={styles.loginWrap}>
-          <Image source={require('../../img/logo.png')} style={styles.logo}/>
-          <FormItem ref="username" label="用户名" placeholder="请输入用户名"/>
-          <FormItem ref="password" label="密码" placeholder="请输入密码" password={true}/>
-          <View style={styles.formActions}>
-            <Button disabled={isLogining} onPress={this.handleClick.bind(this)}>登录</Button>
+        <LinearGradient colors={['#138efc', '#2d72c4']} style={styles.linearGradient}>
+          <View style={styles.loginWrap}>
+            <Text style={styles.mainText}>FACTURA</Text>
+            <FormItem
+              ref="username"
+              style={styles.formitem}
+              inputStyle={styles.inputStyle}
+              labelStyle={styles.labelStyle}
+              labelTextStyle={styles.labelTextStyle}
+              placeholderTextColor="#888"
+              label="用户名"
+              placeholder="请输入用户名"
+            />
+            <FormItem
+              ref="password"
+              style={styles.formitem}
+              inputStyle={styles.inputStyle}
+              labelStyle={styles.labelStyle}
+              labelTextStyle={styles.labelTextStyle}
+              placeholderTextColor="#888"
+              label="密码"
+              placeholder="请输入密码"
+              password={true}
+            />
+            <View style={styles.formActions}>
+              <Button
+                disabled={isLogining}
+                onPress={this.handleClick.bind(this)}
+                style={styles.loginButton}
+                textStyle={{fontSize: 16, fontWeight: 'bold'}}
+              >
+                登录
+              </Button>
+            </View>
           </View>
-        </View>
-        <Text style={styles.footer}>阙天票据管理系统</Text>
+          <Text style={styles.footer}>
+            上海阙天商务信息咨询有限公司
+          </Text>
+        </LinearGradient>
       </View>
     );
   }
@@ -65,32 +97,57 @@ const styles = StyleSheet.create({
     minHeight: Dimensions.get('window').height,
     backgroundColor: "#fff"
   },
+  linearGradient: {
+    flex: 1
+  },
   loginWrap: {
     marginLeft: 'auto',
     marginRight: 'auto',
-    width: "80%",
-    left: -15,
+    width: "60%",
     maxWidth: 320,
-    paddingTop: 80
+    paddingTop: 60
   },
-  logo: {
-    marginLeft: 'auto',
-    marginRight: 'auto',
-    marginBottom: 35,
-    width: 198,
-    height: 93
+  mainText: {
+    fontSize: 42,
+    color: "#fff",
+    fontWeight: 'bold',
+    marginVertical: 30,
+    textAlign: 'center'
+  },
+  formitem: {
+    flexDirection: 'column',
+    marginBottom: 25
+  },
+  labelStyle: {
+    width: '100%',
+    justifyContent: 'center'
+  },
+  labelTextStyle: {
+    color: "#fff",
+    fontSize: 16,
+    fontWeight: 'bold'
+  },
+  inputStyle: {
+    flex: 0,
+    backgroundColor: "#b1d2f3",
+    borderColor: '#d9d9d9'
   },
   formActions: {
-    marginLeft: 68,
-    marginTop: 10
+    marginTop: 30
+  },
+  loginButton: {
+    borderColor: "#0090ff",
+    borderWidth: 2,
+    backgroundColor: "#6ea4dd"
   },
   footer: {
     position: "absolute",
     left: 0,
-    bottom: 40,
+    bottom: 30,
     width: '100%',
     textAlign: 'center',
-    fontSize: 18
+    fontSize: 12,
+    color: "#f0f0f0"
   }
 });
 

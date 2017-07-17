@@ -9,25 +9,33 @@ import {
 class FormItem extends PureComponent {
   constructor(props){
     super(props);
-    this.value = this.props.defaultValue || "";
+    this.value = this.props.defaultValue;
+    this.isReceived = false;
   }
   handleChange(text){
     this.value = text;
     this.props.onChangeText(text);
   }
+  componentWillReceiveProps(nextProps) {
+    if( this.isReceived ) return;
+    this.value = nextProps.defaultValue;
+    this.isReceived = true;
+  }
   render() {
-    let {label, style, password, ...inputProps} = this.props;
+    let {label, size, style, labelStyle, labelTextStyle, inputStyle, password, placeholderTextColor, ...inputProps} = this.props;
     return (
       <View style={[styles.container, style]}>
         {
           label &&
-          <Text style={styles.label}>{label}</Text>
+          <View style={[styles.label, styles[size], labelStyle]}>
+            <Text style={[styles.labelText, labelTextStyle]}>{label}</Text>
+          </View>
         }
         <TextInput
           {...inputProps}
-          style={[styles.input]}
+          style={[styles.input, styles[size], inputStyle]}
           underlineColorAndroid="transparent"
-          placeholderTextColor="#ccc"
+          placeholderTextColor={placeholderTextColor}
           secureTextEntry={password}
           onChangeText={this.handleChange.bind(this)}
         />
@@ -44,32 +52,58 @@ const styles = StyleSheet.create({
   },
   label: {
     width: 60,
-    textAlign: 'right',
-    height: 38,
-    lineHeight: 28,
-    marginRight: 8
+    marginRight: 5,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'flex-end'
+  },
+  labelText: {
+
   },
   input: {
     flex: 1,
-    height: 38,
-    lineHeight: 38,
+    flexDirection: 'row',
+    alignItems: 'center',
     borderColor: '#008cee',
     borderWidth: 1,
     paddingLeft: 12,
     paddingRight: 12,
     backgroundColor: "#fff",
     borderRadius: 4
+  },
+  normal: {
+    height: 38
+  },
+  small: {
+    height: 30
+  },
+  large: {
+    height: 42
   }
 });
 
 FormItem.defaultProps = {
   onChangeText: function(){},
-  password: false
+  password: false,
+  style: {},
+  labelStyle: {},
+  inputStyle: {},
+  labelTextStyle: {},
+  placeholderTextColor: "#ccc",
+  size: 'normal',
+  defaultValue: ""
 };
 
 FormItem.propTypes = {
   onChangeText: PropTypes.func,
-  password: PropTypes.bool
+  password: PropTypes.bool,
+  style: PropTypes.any,
+  labelStyle: PropTypes.any,
+  inputStyle: PropTypes.any,
+  labelTextStyle: PropTypes.any,
+  placeholderTextColor: PropTypes.string,
+  size: PropTypes.string,
+  defaultValue: PropTypes.string
 };
 
 export default FormItem;

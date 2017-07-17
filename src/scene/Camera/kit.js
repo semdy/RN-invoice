@@ -9,14 +9,13 @@ import {
 import QRCode from '@remobile/react-native-qrcode-local-image';
 import Button from '../../component/button';
 
-
 export default class QRCodeDecode extends PureComponent {
   constructor(props) {
     super(props);
     this.state = {text: ''};
   }
   onPress() {
-    QRCode.decode('http://edm.mcake.com/shuxy/2017/20170712102032.jpg', (error, result)=>{
+    QRCode.decode('http://edm.mcake.com/shuxy/2017/20170712114306.jpg', (error, result)=>{
       this.setState({text: JSON.stringify({error, result})});
     });
   }

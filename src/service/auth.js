@@ -1,5 +1,6 @@
 
 import fetch from './fetch';
+import storage from '../service/storage';
 
 export const login = (username, password) => {
   return new Promise((resolve, reject) => {
@@ -16,19 +17,35 @@ export const login = (username, password) => {
 };
 
 export const session = {
-  sessionInfo: {
-    name: "系统管理员",
-    username: "admin",
-    id: "59280dd72001a64700fee81d",
-    role: 2
-  },
+  sessionInfo: null,
   set(info){
     this.sessionInfo = info;
+    return storage.save({
+      key: 'session',
+      data: info,
+      expires: 1000 * 3600 * 24
+    });
   },
   get(){
     return this.sessionInfo;
   },
+  load(){
+    return new Promise((resolve, reject) => {
+      storage.load({
+        key: 'session'
+      }).then(res => {
+        this.sessionInfo = res;
+        resolve(res);
+      }).catch(err => {
+        this.sessionInfo = null;
+        reject(err);
+      });
+    });
+  },
   clear(){
     this.sessionInfo = null;
+    return storage.remove({
+      key: 'session'
+    });
   }
 };

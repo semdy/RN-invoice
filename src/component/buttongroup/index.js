@@ -52,6 +52,7 @@ const styles = StyleSheet.create({
     borderColor: '#38adff',
     justifyContent: 'center',
     alignItems: 'center',
+    paddingHorizontal: 12
   },
   normal: {
     height: 38
@@ -91,7 +92,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#38adff'
   },
   text: {
-    color: '#444',
+    color: '#38adff',
     fontSize: 14
   },
   textSelected: {

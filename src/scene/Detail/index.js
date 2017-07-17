@@ -5,7 +5,8 @@ import {
   Image,
   StyleSheet,
   Dimensions,
-  TouchableWithoutFeedback
+  TouchableOpacity,
+  DeviceEventEmitter
 } from 'react-native';
 
 import Icon from '../../component/icon';
@@ -14,44 +15,61 @@ import Button from '../../component/button';
 import ImageViewer from 'react-native-image-zoom-viewer';
 import Spinner from '../../component/spinner';
 import ScrollableTabView from 'react-native-scrollable-tab-view';
+import ButtonGroup from '../../component/buttongroup';
+import {session} from '../../service/auth';
 
 import ListTable from './ListTable';
+import ListTableSales from './ListTableSales';
 import fetch, {serverUrl} from '../../service/fetch';
 import {confirm} from '../../utils';
 import Toast from 'react-native-root-toast';
 
-
-const dataSource1 = [
+const dataSource = [
   {
-  label: "发票代码",
-  content: '',
-    key: "invoiceCode"
+    label: "发票代码",
+    content: '',
+    key: "invoiceCode",
+    paramKey: "invoiceCode",
+    editableKey: "codeMark"
   },
   {
     label: "发票号码",
     content: '',
-    key: "invoiceNumber"
+    key: "invoiceNumber",
+    paramKey: "invoiceNumber",
+    editableKey: "numberMark"
   },
   {
     label: "开票日期",
     content: '',
-    key: "issueDate"
+    key: "issueDate",
+    paramKey: "issueDate",
+    editableKey: "issueDateMark"
   },
   {
-    label: "税前金额(合计)",
+    label: "税前金额",
     content: '',
-    key: "total.total"
+    key: "total.total",
+    paramKey: "invoicePrice",
+    editableKey: "totalMark"
   },
   {
-    label: "销售方名称",
+    label: "校验码后六位",
     content: '',
-    key: "seller.sellerName"
+    key: "correctCode",
+    paramKey: "correctCode",
+    editableKey: "correctMark"
   },
   {
     label: "购买方名称",
     content: '',
     key: "payer.payerName"
   },
+  {
+    label: "销售方名称",
+    content: '',
+    key: "seller.sellerName"
+  }/*,
   {
     label: "购买方纳税人识别号",
     content: '',
@@ -96,57 +114,8 @@ const dataSource1 = [
     label: "销售方开户行、账号",
     content: '',
     key: "seller.sellerBank"
-  }
+  }*/
 ];
-
-const dataSource2 = [
-  {
-    label: "合计",
-    content: '',
-    key: "total"
-  },
-  {
-    label: "名称",
-    content: '',
-    key: "name"
-  },
-  {
-    label: "规格型号",
-    content: '',
-    key: "type"
-  },
-  {
-    label: "单位",
-    content: '',
-    key: "unit"
-  },
-  {
-    label: "数量",
-    content: '',
-    key: "total"
-  },
-  {
-    label: "单价",
-    content: '',
-    key: "price"
-  },
-  {
-    label: "金额",
-    content: '',
-    key: "totalPrice"
-  },
-  {
-    label: "税率",
-    content: '',
-    key: 'tariff'
-  },
-  {
-    label: "税额",
-    content: '',
-    key: "tax"
-  }];
-
-const FILE_PATH_PREFIX = serverUrl;
 
 function getValueByKey(data, keys){
   let result = data;
@@ -156,21 +125,26 @@ function getValueByKey(data, keys){
   return result;
 }
 
+function getItemEditable(data, key){
+  return String(data[key]) === "1";
+}
+
 class Detail extends PureComponent {
 
   constructor(props){
     super(props);
     this.state = {
-      viewHeight: 100,
-      fillMode: "cover",
       loaded: false,
-      picturePath: "",
+      activeIndex: 0,
+      picturePath: "xxx",
       invoiceData: [],
-      prodData: []
+      prodData: [],
+      canUpdate: false
     };
 
     this.invoiceId = null;
     this.invoiceNumber = null;
+    this.isInit = true;
   }
 
   handleDel(){
@@ -197,16 +171,13 @@ class Detail extends PureComponent {
     });
   }
 
-  handleCamClick(){
-    this.props.navigation.navigate('Camera');
-  }
-
   handleGoBack(){
-    this.props.navigation.goBack();
+    //this.props.navigation.goBack();
+    this.props.navigation.navigate("InvoiceList");
   }
 
   showPhoto(){
-    this.props.navigation.navigate('ImageViewer', {images: [{url: FILE_PATH_PREFIX + this.state.picturePath}]});
+    this.props.navigation.navigate('ImageViewer', {images: [{url: serverUrl + this.state.picturePath}]});
   }
 
   fetchData(invoice, number){
@@ -220,18 +191,100 @@ class Detail extends PureComponent {
   }
 
   setData(data){
-    let invoiceData = dataSource1.map(item => {
-      return Object.assign(item, {content: getValueByKey(data, item.key)})
+    let invoiceData = dataSource.map(item => {
+      return Object.assign(item, {
+        content: getValueByKey(data, item.key),
+        editable: getItemEditable(data, item.editableKey)
+      })
     });
-    let prodData = dataSource2.map(item => {
+
+  /*  let prodData = dataSource2.map(item => {
       return Object.assign(item, {content: getValueByKey(data.sales[0]||{}, item.key)})
-    });
-    this.setState({
+    });*/
+
+    let prodData = data.sales||[];
+    let state = {
       invoiceData,
       prodData,
       picturePath: data.fp_path,
+      canUpdate: invoiceData.some(item => item.editable === true) || false,
       loaded: true
+    };
+
+    if( this.isInit ){
+      state.activeIndex = data.status === "noSales" ? 1 : 0; //无销货明细，跳转至销货明细tab页
+    }
+
+    this.setState(state);
+  }
+
+  handleTabChangle(e){
+    this.setState({
+      activeIndex: e.i
     });
+  }
+
+  handleTabClick(i){
+    this.isInit = false;
+    this.fetchData(this.invoiceId, this.invoiceNumber);
+    this.setState({
+      activeIndex: i
+    });
+  }
+
+  handleUpdate(){
+    if( !this.state.canUpdate ) return;
+
+    let params = {
+      customer: session.get().id,
+      invoice: this.invoiceId,
+      number: this.invoiceNumber
+    };
+
+    this.state.invoiceData.forEach(item => {
+      if( item.editable ){
+        params[item.paramKey] = this.refs.invoicetable.getValueByKey(item.key);
+      }
+    });
+
+    if(params.invoiceCode !== undefined && !/^\d{10}$/.test(params.invoiceCode)){
+      return Toast.show("请输入10位数字的发票代码");
+    }
+    else if(params.invoiceNumber !== undefined && !/^\d{8}$/.test(params.invoiceNumber)){
+      return Toast.show("请输入8位数字的发票号码");
+    }
+    else if(params.correctCode !== undefined && !/^\d{6}$/.test(params.correctCode)){
+      return Toast.show("请输入后6位的校验码");
+    }
+
+    fetch.post("upInvoice", params).then(data => {
+      if (data === true) {
+        Toast.show("更新成功");
+      } else {
+        Toast.show("更新失败");
+      }
+    }, errMsg => {
+      Toast.show("服务器响应出错");
+    })
+  }
+
+  handleUploadSales(){
+    let navParams = {
+      mode: 'camera',
+      uploadType: "uploadSales",
+      invoiceInfo: {
+        id: this.invoiceId,
+        number: this.invoiceNumber
+      }
+    };
+    this.props.navigation.navigate("ScanCamera", navParams);
+  }
+
+  captureDone(){
+    this.setState({
+      activeIndex: 0
+    });
+    this.fetchData(this.invoiceId, this.invoiceNumber);
   }
 
   componentDidMount(){
@@ -239,72 +292,110 @@ class Detail extends PureComponent {
     this.invoiceId = params.invoice.id;
     this.invoiceNumber = params.number;
     this.fetchData(this.invoiceId, this.invoiceNumber);
+    DeviceEventEmitter.addListener('salesCaptureDone', this.captureDone.bind(this));
   }
 
   render() {
+    let {activeIndex, invoiceData, prodData, picturePath, canUpdate, loaded} = this.state;
+
     return (
       <View style={styles.container}>
         <Header
           left={(
             <Icon name="arrow-left-white" onPress={this.handleGoBack.bind(this)}/>
           )}
+          right={(
+            <Icon name="delete-white" onPress={this.handleDel.bind(this)}/>
+          )}
         >
           发票详情
         </Header>
-        <View style={styles.container}>
+        <View style={styles.page}>
 
-          {
-            this.state.picturePath ?
-            <View style={styles.viewContainer}>
-              <TouchableWithoutFeedback
+          <View style={styles.viewContainer}>
+            {
+              picturePath ?
+              <TouchableOpacity
+                activeOpacity={0.7}
+                style={{flex: 1}}
                 onPress={this.showPhoto.bind(this)}
               >
                 <Image
-                  style={{height: this.state.viewHeight}}
-                  resizeMode={this.state.fillMode}
-                  source={{uri: FILE_PATH_PREFIX + this.state.picturePath}}
+                  style={styles.invoiceImg}
+                  source={{uri: serverUrl + picturePath}}
                 />
-              </TouchableWithoutFeedback>
-            </View> :
-            <Text>
-            </Text>
-          }
+              </TouchableOpacity>
+              :
+              <View style={styles.qrcodeHintContainer}>
+                <Text style={styles.qrcodeHintText}>此发票通过二维码识别</Text>
+              </View>
+            }
+          </View>
 
           <ScrollableTabView
+            renderTabBar={() =>
+              <View style={styles.tabBar}>
+                <ButtonGroup
+                  items={[{text: '发票信息'}, {text: '销货明细'}]}
+                  activeIndex={activeIndex}
+                  onPress={this.handleTabClick.bind(this)}
+                />
+              </View>}
             style={styles.tabContainer}
-            tabBarBackgroundColor='white'
             tabBarActiveTextColor='#FE566D'
             tabBarInactiveTextColor='#555555'
             tabBarTextStyle={styles.tabBarText}
             tabBarUnderlineStyle={styles.tabBarUnderline}
+            initialPage={activeIndex}
+            page={activeIndex}
+            onChangeTab={this.handleTabChangle.bind(this)}
           >
             <ListTable
+              ref="invoicetable"
               tabLabel="发票信息"
-              dataSource={this.state.invoiceData}
-              style={[styles.listTable, !this.state.picturePath && styles.noPic]}
+              dataSource={invoiceData}
+              style={[styles.listTable, {backgroundColor: '#fff'}, !picturePath && styles.noPic]}
+              renderFooter={() =>
+                <View style={styles.buttonField}>
+                  <Button
+                    size="small"
+                    style={{width: 100}}
+                    disabled={!canUpdate}
+                    onPress={this.handleUpdate.bind(this)}
+                  >
+                    更新
+                  </Button>
+                </View>
+              }
             />
-            <ListTable
-              tabLabel="货物信息"
-              dataSource={this.state.prodData}
-              style={[styles.listTable, !this.state.picturePath && styles.noPic]}
+            <ListTableSales
+              tabLabel="销货明细"
+              dataSource={prodData}
+              style={[styles.listTable, !prodData.length ? styles.noData : {paddingVertical: 0}, !picturePath && styles.noPic]}
+              renderEmpty={() =>
+                <TouchableOpacity
+                  style={styles.uploadButton}
+                  onPress={this.handleUploadSales.bind(this)}
+                >
+                  <Icon name="plus" size="large" style={{opacity: 0.5}}/>
+                  <Text style={styles.uploadHintText}>请拍摄销货清单</Text>
+                </TouchableOpacity>
+              }
+              renderFooter={() =>
+                <View style={[styles.queryFooter, !prodData.length && styles.queryFooterEmpty]}>
+                  <Text style={{fontSize: 12}}>
+                    查询结果: {prodData.length}条
+                  </Text>
+                </View>
+              }
             />
           </ScrollableTabView>
 
           {
-            !this.state.loaded &&
+            !loaded &&
             <Spinner/>
           }
 
-        </View>
-
-        <View style={styles.footer}>
-          <Button
-            style={{width: 100}}
-            onPress={this.handleCamClick.bind(this)}
-          >
-            上传出库单
-          </Button>
-          <Button type="danger" style={{width: 100}} onPress={this.handleDel.bind(this)}>删除</Button>
         </View>
 
       </View>
@@ -314,25 +405,57 @@ class Detail extends PureComponent {
 
 const styles = StyleSheet.create({
   container: {
-    position: "relative",
     flex: 1,
-    backgroundColor: "#fff"
+    backgroundColor: "#d3e1fe"
+  },
+  page: {
+    paddingVertical: 5,
+    paddingHorizontal: 5,
+    flex: 1
   },
   viewContainer: {
-
+    height: 140
   },
   tabContainer: {
-    backgroundColor: "#f3f3f3"
+
+  },
+  invoiceImg: {
+    width: '100%',
+    height: Dimensions.get("window").width,
+    transform: [
+      {
+        rotate: '-90deg'
+      }
+    ]
+  },
+  tabBar: {
+    paddingVertical: 8
   },
   listTable: {
-    height: Dimensions.get('window').height - 280
+    borderRadius: 4,
+    paddingVertical: 8,
+    paddingHorizontal: 8,
+    height: Dimensions.get('window').height - 278
   },
   noPic: {
-    height: Dimensions.get('window').height - 180
+    height: Dimensions.get('window').height - 143
   },
   tabBarText: {
     fontSize: 14,
     marginTop: 13,
+  },
+  qrcodeHintContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center'
+  },
+  qrcodeHintText: {
+    fontSize: 18
+  },
+  buttonField: {
+    paddingTop: 5,
+    flexDirection: 'row',
+    justifyContent: 'center'
   },
   tabBarUnderline: {
     backgroundColor: '#FE566D'
@@ -340,12 +463,40 @@ const styles = StyleSheet.create({
   footer: {
     position: 'absolute',
     left: 0,
-    bottom: 8,
+    bottom: 5,
     width: '100%',
     flexDirection: 'row',
-    paddingLeft: 15,
-    paddingRight: 15,
-    justifyContent: 'space-between'
+    justifyContent: 'center'
+  },
+  uploadButton: {
+    width: 120,
+    height: 120,
+    borderRadius: 120,
+    backgroundColor: '#eee',
+    alignItems: 'center',
+    justifyContent: 'center',
+    position: 'absolute',
+    left: '50%',
+    top: '50%',
+    marginLeft: -50,
+    marginTop: -60
+  },
+  uploadHintText: {
+    fontSize: 12
+  },
+  noData: {
+    backgroundColor: '#fff',
+    borderRadius: 4
+  },
+  queryFooter: {
+    padding: 8,
+    flexDirection: 'row',
+    justifyContent: 'flex-end'
+  },
+  queryFooterEmpty: {
+    position: "absolute",
+    right: 10,
+    bottom: 0
   }
 });
 

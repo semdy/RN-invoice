@@ -242,9 +242,13 @@ class Detail extends PureComponent {
     const {params} = this.props.navigation.state;
     this.invoiceId = params.invoice.id;
     this.invoiceNumber = params.number;
+    this.subscription = DeviceEventEmitter.addListener('salesCaptureDone', this.captureDone.bind(this));
     this.fetchData(this.invoiceId, this.invoiceNumber);
-    DeviceEventEmitter.addListener('salesCaptureDone', this.captureDone.bind(this));
   }
+
+  componentWillUnmount(){
+    this.subscription.remove();
+  };
 
   render() {
     let {activeIndex, invoiceData, prodData, picturePath, canUpdate, loaded} = this.state;

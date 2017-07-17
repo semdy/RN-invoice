@@ -15,7 +15,8 @@ import FormItem from '../../component/formitem';
 import Spinner from '../../component/spinner';
 
 import fetch from '../../service/fetch';
-import {session} from '../../service/auth';
+import {session, logout} from '../../service/auth';
+import {confirm} from '../../utils';
 import Toast from 'react-native-root-toast';
 
 class MyInfo extends PureComponent {
@@ -74,6 +75,14 @@ class MyInfo extends PureComponent {
     });
   }
 
+  handleLogout(){
+    confirm("确定退出并重新登录吗?").then(() => {
+      logout().then(() => {
+        this.props.navigation.navigate('Login');
+      });
+    }, () => {});
+  }
+
   componentDidMount(){
     fetch.get("getCustomer", {customer: session.get().id}).then(res => {
       if( res.success ){
@@ -97,6 +106,14 @@ class MyInfo extends PureComponent {
         <Header
           left={(
             <Icon name="arrow-left-white" onPress={this.props.navigation.navigate.bind(this,'Home')}/>
+          )}
+          right={(
+              <Text
+                style={{color: '#fff'}}
+                onPress={this.handleLogout.bind(this)}
+              >
+                退出
+              </Text>
           )}
         >
           用户信息

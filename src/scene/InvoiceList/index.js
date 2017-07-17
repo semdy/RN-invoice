@@ -379,6 +379,9 @@ const styles = StyleSheet.create({
   scrollview: {
     flex: 1
   },
+  itemPanel: {
+
+  },
   dateStyle: {
     marginHorizontal: 5,
     flexDirection: 'row',
@@ -387,15 +390,16 @@ const styles = StyleSheet.create({
   dateLine: {
     position: 'absolute',
     left: '2%',
-    top: 11,
-    width: '96%'
+    top: 10,
+    width: '96%',
+    opacity: .8
   },
   dateTextStyle: {
-    color: '#888',
+    color: '#999',
     fontSize: 12,
     textAlign: 'center',
     paddingHorizontal: 8,
-    paddingVertical: 3,
+    paddingVertical: 2,
     marginLeft: -30,
     backgroundColor: '#fff'
   },

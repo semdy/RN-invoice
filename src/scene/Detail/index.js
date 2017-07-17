@@ -177,7 +177,7 @@ class Detail extends PureComponent {
 
   handleTabClick(i){
     this.isInit = false;
-    this.fetchData(this.invoiceId, this.invoiceNumber);
+    this.refresh();
     this.setState({
       activeIndex: i
     });
@@ -211,6 +211,7 @@ class Detail extends PureComponent {
     fetch.post("upInvoice", params).then(data => {
       if (data === true) {
         Toast.show("更新成功");
+        this.refresh();
       } else {
         Toast.show("更新失败");
       }
@@ -235,6 +236,10 @@ class Detail extends PureComponent {
     this.setState({
       activeIndex: 0
     });
+    this.refresh();
+  }
+
+  refresh(){
     this.fetchData(this.invoiceId, this.invoiceNumber);
   }
 
@@ -243,7 +248,7 @@ class Detail extends PureComponent {
     this.invoiceId = params.invoice.id;
     this.invoiceNumber = params.number;
     this.subscription = DeviceEventEmitter.addListener('salesCaptureDone', this.captureDone.bind(this));
-    this.fetchData(this.invoiceId, this.invoiceNumber);
+    this.refresh();
   }
 
   componentWillUnmount(){

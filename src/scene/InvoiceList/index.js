@@ -2,6 +2,7 @@ import React, { PureComponent } from 'react'
 import {
   View,
   Text,
+  Image,
   StyleSheet,
   FlatList,
   Picker,
@@ -171,9 +172,12 @@ class InvoiceList extends PureComponent {
     let data = info.item;
     return (
       <View style={styles.itemPanel}>
-        <Text style={styles.dateStyle}>
-          {data.date.replace(/\-/g, "/")}
-        </Text>
+        <View style={styles.dateStyle}>
+          <Image style={styles.dateLine} source={require('../../img/dash-line.png')} resizeMode="cover"/>
+          <Text style={styles.dateTextStyle}>
+            {data.date.replace(/\-/g, "/")}
+          </Text>
+        </View>
         {
           data.list.map(item => {
             return (
@@ -376,8 +380,24 @@ const styles = StyleSheet.create({
     flex: 1
   },
   dateStyle: {
+    marginHorizontal: 5,
+    flexDirection: 'row',
+    justifyContent: 'center'
+  },
+  dateLine: {
+    position: 'absolute',
+    left: '2%',
+    top: 11,
+    width: '96%'
+  },
+  dateTextStyle: {
+    color: '#888',
+    fontSize: 12,
+    textAlign: 'center',
+    paddingHorizontal: 8,
     paddingVertical: 3,
-    textAlign: 'center'
+    marginLeft: -30,
+    backgroundColor: '#fff'
   },
   tableRow: {
     flexDirection: 'row',
@@ -386,7 +406,7 @@ const styles = StyleSheet.create({
     borderColor: '#eee',
   },
   tableHeader: {
-    borderBottomWidth: 1
+    borderBottomWidth: 0
   },
   lineNumber: {
     width: 90,

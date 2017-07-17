@@ -16,6 +16,13 @@ export const login = (username, password) => {
   });
 };
 
+export const logout = () => {
+  return new Promise((resolve, reject) => {
+      session.clear();
+      resolve();
+  });
+};
+
 export const session = {
   sessionInfo: null,
   set(info){

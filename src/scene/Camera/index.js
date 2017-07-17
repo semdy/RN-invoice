@@ -28,7 +28,7 @@ export default class DefaultScreen extends Component {
         aspect: Camera.constants.Aspect.fill,
         captureTarget: Camera.constants.CaptureTarget.memory,
         type: Camera.constants.Type.back,
-        orientation: Camera.constants.Orientation.auto,
+        orientation: Camera.constants.Orientation.portrait,
         torchMode: Camera.constants.TorchMode.off,
         captureQuality: Camera.constants.CaptureQuality.medium
       },
@@ -395,8 +395,9 @@ const styles = StyleSheet.create({
   },
   redoWrap: {
     position: 'absolute',
-    right: 10,
-    bottom: 30,
+    right: -20,
+    bottom: 0,
+    padding: 30,
     transform: [
       {
         rotate: '90deg'

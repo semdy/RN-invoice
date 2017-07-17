@@ -107,6 +107,10 @@ export default class DefaultScreen extends Component {
     }, 6000);
   }
 
+  componentWillUnmount() {
+    if( this.timeId ) clearTimeout(this.timeId);
+  }
+
   render() {
     let {loaded, cameraEnable, showCaptureHint} = this.state;
     return (

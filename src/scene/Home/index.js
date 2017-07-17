@@ -7,7 +7,8 @@ import {
 } from 'react-native';
 
 import fetch from '../../service/fetch';
-import {session} from '../../service/auth';
+import {session, logout} from '../../service/auth';
+import {confirm} from '../../utils';
 
 import Icon from '../../component/icon';
 import Header from '../../component/header';
@@ -86,6 +87,14 @@ class Home extends PureComponent {
     this.props.navigation.navigate('InvoiceList', {status, day});
   }
 
+  handleLogout(){
+    confirm("确定退出并重新登录吗?").then(() => {
+      logout().then(() => {
+        this.props.navigation.navigate('Login');
+      });
+    }, () => {});
+  }
+
   _getValueByStatus(status){
      let result = this.state.data.statusTotal.find((item) => {
        return item.status === status;
@@ -109,9 +118,17 @@ class Home extends PureComponent {
           left={(
             <Icon name="setting" onPress={this.handleSetPress.bind(this)}/>
           )}
-          right={`欢迎 ${session.get().name}`}
+          right={(
+            <View style={styles.rightAactions}>
+              {/*<Text style={{color: '#fff'}}>欢迎 {session.get().name}</Text>*/}
+              <Text
+                style={{marginLeft: 8, color: '#fff'}}
+                onPress={this.handleLogout.bind(this)}
+              >退出</Text>
+            </View>
+          )}
         >
-          主页
+          {session.get().name}
         </Header>
         <View style={styles.page}>
           <View style={styles.topMain}>
@@ -234,6 +251,9 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingHorizontal: 5,
     paddingVertical: 12
+  },
+  rightAactions: {
+    flexDirection: 'row'
   },
   topMain: {
     flexDirection: 'row',

@@ -237,11 +237,14 @@ export default class DefaultScreen extends Component {
       <View style={styles.bottom}>
         {
           this.uploadType === "newUpload" ?
-          <Text style={styles.leftAction}
+            <View style={styles.leftAction}>
+              <TouchableOpacity
                 onPress={this.switchToScanner.bind(this)}
-          >
-            扫描二维码
-          </Text>
+              >
+                <Icon size="large" name="qrcode" style={styles.actionIcon}/>
+                <Text style={styles.actionText}>扫码</Text>
+              </TouchableOpacity>
+            </View>
             :
           <Text style={[styles.leftAction, {left: 0}]}
             onPress={this.handleBack.bind(this)}
@@ -318,13 +321,9 @@ const styles = StyleSheet.create({
   },
   leftAction: {
     position: 'absolute',
-    left: -12,
-    top: -6,
-    paddingHorizontal: 3,
-    paddingVertical: 8,
-    borderRadius: 4,
-    color: "#fff",
-    fontSize: 12,
+    left: 16,
+    top: -25,
+    padding: 0,
     transform: [
       {
         rotate: "90deg"
@@ -333,6 +332,10 @@ const styles = StyleSheet.create({
         translateX: 23
       }
     ]
+  },
+  actionText: {
+    color: '#fff',
+    textAlign: 'center'
   },
   torchStyle: {
     position: "absolute",

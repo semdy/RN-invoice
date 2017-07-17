@@ -86,14 +86,14 @@ ListItem.defaultProps = {
 
 ListItem.propTypes = {
   iconName: PropTypes.string,
-  text: PropTypes.oneOfType(
+  text: PropTypes.oneOfType([
     PropTypes.string,
     PropTypes.number
-  ),
-  extraText: PropTypes.oneOfType(
+  ]),
+  extraText: PropTypes.oneOfType([
     PropTypes.string,
     PropTypes.number
-  ),
+  ]),
   style: PropTypes.object,
   iconStyle: PropTypes.object,
   textStyle: PropTypes.object,

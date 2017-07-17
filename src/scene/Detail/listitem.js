@@ -64,10 +64,10 @@ ListItem.defaultProps = {
 
 ListItem.propTypes = {
   label: PropTypes.string,
-  content: PropTypes.oneOfType(
+  content: PropTypes.oneOfType([
     PropTypes.string,
     PropTypes.number
-  ),
+  ]),
   style: PropTypes.any,
   labelStyle: PropTypes.object,
   contentStyle: PropTypes.object,

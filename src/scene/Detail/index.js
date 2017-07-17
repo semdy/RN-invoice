@@ -69,52 +69,7 @@ const dataSource = [
     label: "销售方名称",
     content: '',
     key: "seller.sellerName"
-  }/*,
-  {
-    label: "购买方纳税人识别号",
-    content: '',
-    key: "payer.ratePayerId"
-  },
-  {
-    label: "销售方纳税人识别号",
-    content: '',
-    key: "seller.sellerId"
-  },
-  {
-    label: "税额合计",
-    content: '',
-    key: "taxTotal"
-  },
-  {
-    label: "价税合计(小写)",
-    content: '',
-    key: "total.totalCoverTaxDigits"
-  },
-  {
-    label: "是否作废",
-    content: '',
-    key: "invalid"
-  },
-  {
-    label: "购买方地址、电话",
-    content: '',
-    key: 'payer.payerAddressAndTel'
-  },
-  {
-    label: "购买方开户行、账号",
-    content: '',
-    key: "payer.payerBank"
-  },
-  {
-    label: "销售方地址、电话",
-    content: '',
-    key: "seller.sellerAddressAndTel"
-  },
-  {
-    label: "销售方开户行、账号",
-    content: '',
-    key: "seller.sellerBank"
-  }*/
+  }
 ];
 
 function getValueByKey(data, keys){
@@ -197,10 +152,6 @@ class Detail extends PureComponent {
         editable: getItemEditable(data, item.editableKey)
       })
     });
-
-  /*  let prodData = dataSource2.map(item => {
-      return Object.assign(item, {content: getValueByKey(data.sales[0]||{}, item.key)})
-    });*/
 
     let prodData = data.sales||[];
     let state = {
@@ -438,7 +389,7 @@ const styles = StyleSheet.create({
     height: Dimensions.get('window').height - 278
   },
   noPic: {
-    height: Dimensions.get('window').height - 143
+    //height: Dimensions.get('window').height - 143
   },
   tabBarText: {
     fontSize: 14,

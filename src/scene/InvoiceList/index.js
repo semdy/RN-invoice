@@ -40,6 +40,18 @@ function getCurrentDate(){
   return date.getFullYear() + "/" + padZero(date.getMonth() + 1) + "/" + padZero(date.getDate());
 }
 
+function object2Array(obj){
+  let arr = [];
+  for(let i in obj){
+    arr.push({
+      date: i,
+      list: obj[i]
+    });
+  }
+
+  return arr;
+}
+
 class InvoiceList extends PureComponent {
 
   constructor(props){
@@ -53,20 +65,23 @@ class InvoiceList extends PureComponent {
       total: 0
     };
     this.page = 1;
+    this.dataMap = {};
+    this.checkedItems = [];
   }
 
   handleQuery(){
     this.page = 1;
+    this.dataMap = {};
+    this.checkedItems = [];
     this.fetchData(this.refs.code.value, this.state.invoiceStatus, this.state.invoiceDay, this.page);
   }
 
   handleDel(){
-    let checkedItems = this.state.data.filter(item => item.checked === true);
-    if( checkedItems.length === 0 )
+    if( this.checkedItems.length === 0 )
       return Toast.show("请至少选择一项");
 
     confirm("确定要删除吗?").then(() => {
-      this.doDel(checkedItems);
+      this.doDel(this.checkedItems);
     }, function(){});
   }
 
@@ -94,9 +109,13 @@ class InvoiceList extends PureComponent {
 
   handleCheck(item, isChecked){
     item.checked = isChecked;
+    if( isChecked && !this.checkedItems.some(checked => checked.number === item.number) ) {
+      this.checkedItems.push(item);
+    }
+    this.checkedItems = this.checkedItems.filter(item => item.checked === true);
   }
 
-  fetchData(invoiceNumber="", status="", day="", page=1, isAppend=false){
+  fetchData(invoiceNumber="", status="", day="", page=1){
     this.setState({
       loaded: false
     });
@@ -109,10 +128,19 @@ class InvoiceList extends PureComponent {
       page
     };
 
-    fetch.get("invoiceList", params).then(data => {
+    let data = this.dataMap;
+
+    fetch.get("invoiceList", params).then(res => {
+      res.invoiceList.forEach(item => {
+        if( data[item.date] === undefined ){
+          data[item.date] = [];
+        }
+        data[item.date].push(item);
+      });
+
       this.setState({
-        data: isAppend ? this.state.data.concat(data.invoiceList) : data.invoiceList,
-        total: data.sum,
+        data: object2Array(data),
+        total: res.sum,
         loaded: true
       });
     });
@@ -120,11 +148,11 @@ class InvoiceList extends PureComponent {
 
   appendData(){
     if( !this.state.loaded ) return;
-    this.fetchData(this.refs.code.value, this.state.invoiceStatus, this.state.invoiceDay, ++this.page, true);
+    this.fetchData(this.refs.code.value, this.state.invoiceStatus, this.state.invoiceDay, ++this.page);
   }
 
   keyExtractor(item) {
-    return item.invoice.id;
+    return item.date;
   }
 
   renderHeader(){
@@ -135,34 +163,43 @@ class InvoiceList extends PureComponent {
           <Text style={styles.tableCell}>发票号</Text>
           <Text style={[styles.tableCell, styles.cellStatus]}>状态</Text>
         </View>
-        {/*<Text style={styles.dateStyle}>
-          {getCurrentDate()}
-        </Text>*/}
       </View>
     );
   }
 
   renderItem(info){
-    let item = info.item;
+    let data = info.item;
     return (
-      <TouchableOpacity
-        style={styles.tableRow}
-        activeOpacity={0.7}
-        onPress={this.props.navigation.navigate.bind(this, 'Detail', item)}
-      >
-        <View style={[styles.lineNumber, {paddingVertical: 4}]}>
-          <CheckBox
-            style={styles.checkbox}
-            onClick={this.handleCheck.bind(this, item)}
-            isChecked={false}
-          />
-          <Text>{item.number}</Text>
-        </View>
-        <Text style={styles.tableCell}>{item.invoiceNumber}</Text>
-        <Text style={[styles.tableCell, styles.cellStatus, {color: INVOICE_STATUS[item.invoice.status].color}]}>
-          {INVOICE_STATUS[item.invoice.status].text}
+      <View style={styles.itemPanel}>
+        <Text style={styles.dateStyle}>
+          {data.date.replace(/\-/g, "/")}
         </Text>
-      </TouchableOpacity>
+        {
+          data.list.map(item => {
+            return (
+              <TouchableOpacity
+                key={item.number}
+                style={styles.tableRow}
+                activeOpacity={0.7}
+                onPress={this.props.navigation.navigate.bind(this, 'Detail', item)}
+              >
+                <View style={[styles.lineNumber, {paddingVertical: 4}]}>
+                  <CheckBox
+                    style={styles.checkbox}
+                    onClick={this.handleCheck.bind(this, item)}
+                    isChecked={false}
+                  />
+                  <Text>{item.number}</Text>
+                </View>
+                <Text style={styles.tableCell}>{item.invoiceNumber}</Text>
+                <Text style={[styles.tableCell, styles.cellStatus, {color: INVOICE_STATUS[item.invoice.status].color}]}>
+                  {INVOICE_STATUS[item.invoice.status].text}
+                </Text>
+              </TouchableOpacity>
+            )
+          })
+        }
+      </View>
     )
   }
 

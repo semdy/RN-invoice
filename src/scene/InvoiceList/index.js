@@ -287,7 +287,7 @@ class InvoiceList extends PureComponent {
                 <Picker.Item label="销货明细需补充" value="noSales" />
                 <Picker.Item label="信息需更新" value="needChange" />
                 <Picker.Item label="无法识别" value="noInvoice" />
-                <Picker.Item label="成功" value="success" />
+                <Picker.Item label="已完成" value="success" />
               </Picker>
             </View>
           </View>

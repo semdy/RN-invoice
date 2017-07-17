@@ -36,11 +36,6 @@ function padZero(n){
   return n < 10 ? "0" + n : n;
 }
 
-function getCurrentDate(){
-  let date = new Date();
-  return date.getFullYear() + "/" + padZero(date.getMonth() + 1) + "/" + padZero(date.getDate());
-}
-
 function object2Array(obj){
   let arr = [];
   for(let i in obj){

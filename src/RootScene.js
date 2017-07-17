@@ -1,4 +1,8 @@
 import React, { PureComponent } from 'react';
+import {
+  View,
+  StatusBar
+} from "react-native";
 import { StackNavigator } from 'react-navigation';
 
 import Login from './scene/Login';
@@ -16,7 +20,13 @@ class RootScene extends PureComponent {
 
   render() {
     return (
-      <Navigator/>
+      <View style={{flex: 1}}>
+        <StatusBar
+          backgroundColor="#0090ff"
+          barStyle="light-content"
+        />
+        <Navigator/>
+      </View>
     );
   }
 }

@@ -111,7 +111,7 @@ class Home extends PureComponent {
           )}
           right={`欢迎 ${session.get().name}`}
         >
-          {session.get().name}
+          主页
         </Header>
         <View style={styles.page}>
           <View style={styles.topMain}>

@@ -244,7 +244,7 @@ const styles = StyleSheet.create({
   },
   circle: {
     width: 120,
-    marginTop: 35,
+    marginTop: 5,
     marginLeft: 'auto',
     marginRight: 'auto'
   },

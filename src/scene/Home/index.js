@@ -156,20 +156,6 @@ class Home extends PureComponent {
               >
                 全部
               </Button>
-              <Button
-                size="small"
-                style={[styles.gbutton, activeIndex === 4 && styles.currentButton]}
-                onPress={this.handleType.bind(this, 4, 40)}
-              >
-                当月开票
-              </Button>
-              <Button
-                size="small"
-                style={[styles.gbutton, activeIndex === 5 && styles.currentButton]}
-                onPress={this.handleType.bind(this, 5, 50)}
-              >
-                上月开票
-              </Button>
             </View>
           </View>
 

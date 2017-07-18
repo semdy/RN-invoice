@@ -25,16 +25,12 @@ import {session} from '../../service/auth';
 
 const INVOICE_STATUS = {
   "success": {text: "已完成", color: "green"},
-  "needChange": {text: "信息需要更新", color: "#f90"},
+  "needChange": {text: "信息需更新", color: "#f90"},
   "noInvoice": {text: "无法识别", color: "#cc0000"},
   "failed": {text: "查询无结果", color: "#cc0000"},
   "noSales": {text: "销货明细需补充", color: "#f90"},
   "waiting": {text: "查询中", color: "#666"}
 };
-
-function padZero(n){
-  return n < 10 ? "0" + n : n;
-}
 
 function object2Array(obj){
   let arr = [];
@@ -174,11 +170,11 @@ class InvoiceList extends PureComponent {
           </Text>
         </View>
         {
-          data.list.map(item => {
+          data.list.map((item, i) => {
             return (
               <TouchableOpacity
                 key={item.number}
-                style={styles.tableRow}
+                style={[styles.tableRow, (i === data.list.length - 1) && {borderColor: 'transparent'}]}
                 activeOpacity={0.7}
                 onPress={this.props.navigation.navigate.bind(this, 'Detail', item)}
               >
@@ -265,10 +261,12 @@ class InvoiceList extends PureComponent {
                 style={styles.picker}
                 selectedValue={this.state.invoiceDay}
                 onValueChange={(value) => this.setState({invoiceDay: value})}>
+                <Picker.Item label="当天上传" value="1" />
+                <Picker.Item label="7天上传" value="7" />
+                <Picker.Item label="30天上传" value="30" />
                 <Picker.Item label="全部" value="" />
-                <Picker.Item label="当天" value="1" />
-                <Picker.Item label="7天" value="7" />
-                <Picker.Item label="30天" value="30" />
+                <Picker.Item label="当月开票" value="40" />
+                <Picker.Item label="上月开票" value="50" />
               </Picker>
             </View>
           </View>

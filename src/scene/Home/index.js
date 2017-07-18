@@ -133,21 +133,21 @@ class Home extends PureComponent {
                 style={[styles.gbutton, activeIndex === 0 && styles.currentButton]}
                 onPress={this.handleType.bind(this, 0, 1)}
               >
-                当天
+                当天上传
               </Button>
               <Button
                 size="small"
                 style={[styles.gbutton, activeIndex === 1 && styles.currentButton]}
                 onPress={this.handleType.bind(this, 1, 7)}
               >
-                7天
+                7天上传
               </Button>
               <Button
                 size="small"
                 style={[styles.gbutton, activeIndex === 2 && styles.currentButton]}
                 onPress={this.handleType.bind(this, 2, 30)}
               >
-                30天
+                30天上传
               </Button>
               <Button
                 size="small"
@@ -155,6 +155,20 @@ class Home extends PureComponent {
                 onPress={this.handleType.bind(this, 3, "")}
               >
                 全部
+              </Button>
+              <Button
+                size="small"
+                style={[styles.gbutton, activeIndex === 4 && styles.currentButton]}
+                onPress={this.handleType.bind(this, 4, 40)}
+              >
+                当月开票
+              </Button>
+              <Button
+                size="small"
+                style={[styles.gbutton, activeIndex === 5 && styles.currentButton]}
+                onPress={this.handleType.bind(this, 5, 50)}
+              >
+                上月开票
               </Button>
             </View>
           </View>
@@ -239,17 +253,17 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     backgroundColor: '#fff',
     borderRadius: 4,
-    marginBottom: 15,
+    marginBottom: 10,
     padding: 15
   },
   circle: {
     width: 120,
-    marginTop: 10,
+    marginTop: 35,
     marginLeft: 'auto',
     marginRight: 'auto'
   },
   buttonGroupWrap: {
-    width: 70
+    width: 90
   },
   gbutton: {
     marginBottom: 2,

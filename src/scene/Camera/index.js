@@ -246,7 +246,7 @@ export default class DefaultScreen extends Component {
               </TouchableOpacity>
             </View>
             :
-          <Text style={[styles.leftAction, {left: 0}]}
+          <Text style={[styles.leftAction, {left: 2, top: -5, padding: 8, color: '#fff'}]}
             onPress={this.handleBack.bind(this)}
           >
             取消

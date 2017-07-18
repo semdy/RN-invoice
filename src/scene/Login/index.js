@@ -4,7 +4,8 @@ import {
   Text,
   StyleSheet,
   Image,
-  Dimensions
+  Dimensions,
+  KeyboardAvoidingView
 } from 'react-native';
 
 import Button from '../../component/button';
@@ -46,41 +47,43 @@ class Login extends PureComponent {
     let {isLogining} = this.state;
     return (
       <View style={styles.container}>
-        <LinearGradient colors={['#138efc', '#2d72c4']} style={styles.linearGradient}>
-          <View style={styles.loginWrap}>
-            <Text style={styles.mainText}>FACTURA</Text>
-            <FormItem
-              ref="username"
-              style={styles.formitem}
-              inputStyle={styles.inputStyle}
-              labelStyle={styles.labelStyle}
-              labelTextStyle={styles.labelTextStyle}
-              placeholderTextColor="#888"
-              label="用户名"
-              placeholder="请输入用户名"
-            />
-            <FormItem
-              ref="password"
-              style={styles.formitem}
-              inputStyle={styles.inputStyle}
-              labelStyle={styles.labelStyle}
-              labelTextStyle={styles.labelTextStyle}
-              placeholderTextColor="#888"
-              label="密码"
-              placeholder="请输入密码"
-              password={true}
-            />
-            <View style={styles.formActions}>
-              <Button
-                disabled={isLogining}
-                onPress={this.handleClick.bind(this)}
-                style={styles.loginButton}
-                textStyle={{fontSize: 16, fontWeight: 'bold'}}
-              >
-                登录
-              </Button>
+        <LinearGradient colors={['#0090ff', '#2d72c4']} style={styles.linearGradient}>
+          <KeyboardAvoidingView behavior="position">
+            <View style={styles.loginWrap}>
+              <Text style={styles.mainText}>FACTURA</Text>
+              <FormItem
+                ref="username"
+                style={styles.formitem}
+                inputStyle={styles.inputStyle}
+                labelStyle={styles.labelStyle}
+                labelTextStyle={styles.labelTextStyle}
+                placeholderTextColor="#888"
+                label="用户名"
+                placeholder="请输入用户名"
+              />
+              <FormItem
+                ref="password"
+                style={styles.formitem}
+                inputStyle={styles.inputStyle}
+                labelStyle={styles.labelStyle}
+                labelTextStyle={styles.labelTextStyle}
+                placeholderTextColor="#888"
+                label="密码"
+                placeholder="请输入密码"
+                password={true}
+              />
+              <View style={styles.formActions}>
+                <Button
+                  disabled={isLogining}
+                  onPress={this.handleClick.bind(this)}
+                  style={styles.loginButton}
+                  textStyle={{fontSize: 16, fontWeight: 'bold'}}
+                >
+                  登录
+                </Button>
+              </View>
             </View>
-          </View>
+          </KeyboardAvoidingView>
           <Text style={styles.footer}>
             上海阙天商务信息咨询有限公司
           </Text>
@@ -92,13 +95,11 @@ class Login extends PureComponent {
 
 const styles = StyleSheet.create({
   container: {
-    position: "relative",
-    flex: 1,
-    minHeight: Dimensions.get('window').height,
-    backgroundColor: "#fff"
+    flex: 1
   },
   linearGradient: {
-    flex: 1
+    flex: 1,
+    minHeight: Dimensions.get('window').height
   },
   loginWrap: {
     marginLeft: 'auto',

@@ -271,7 +271,6 @@ class Detail extends PureComponent {
           发票详情
         </Header>
         <View style={styles.page}>
-
           <View style={styles.viewContainer}>
             {
               picturePath ?
@@ -374,7 +373,8 @@ const styles = StyleSheet.create({
     flex: 1
   },
   viewContainer: {
-    height: 140
+    height: 140,
+    overflow: 'hidden'
   },
   tabContainer: {
 

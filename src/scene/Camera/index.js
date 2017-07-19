@@ -50,12 +50,13 @@ export default class DefaultScreen extends Component {
 
     const thenFun = () => {
       if( isGoHome ){
-        if( this.uploadType === 'newUpload' ) {
-          //this.props.navigation.navigate("Home");
-          this.props.navigation.goBack();
-        } else {
-          this.props.navigation.goBack();
+        this.props.navigation.goBack();
+        if( this.uploadType === 'uploadSales' ){
           DeviceEventEmitter.emit('salesCaptureDone');
+        }
+      } else {
+        if( this.uploadType === 'newUpload' ){
+          this.switchToScanner();
         }
       }
     };

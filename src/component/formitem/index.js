@@ -58,7 +58,7 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-end'
   },
   labelText: {
-
+    backgroundColor: 'transparent'
   },
   input: {
     flex: 1,
@@ -69,7 +69,8 @@ const styles = StyleSheet.create({
     paddingLeft: 12,
     paddingRight: 12,
     backgroundColor: "#fff",
-    borderRadius: 4
+    borderRadius: 4,
+    fontSize: 14
   },
   normal: {
     height: 38

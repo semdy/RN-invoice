@@ -113,7 +113,8 @@ const styles = StyleSheet.create({
     color: "#fff",
     fontWeight: 'bold',
     marginVertical: 30,
-    textAlign: 'center'
+    textAlign: 'center',
+    backgroundColor: 'transparent'
   },
   formitem: {
     flexDirection: 'column',
@@ -148,7 +149,8 @@ const styles = StyleSheet.create({
     width: '100%',
     textAlign: 'center',
     fontSize: 12,
-    color: "#f0f0f0"
+    color: "#f0f0f0",
+    backgroundColor: 'transparent'
   }
 });
 

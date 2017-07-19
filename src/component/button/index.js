@@ -18,17 +18,17 @@ class Button extends PureComponent {
   render() {
     let {disabled, onPress, style, textStyle, size, activeOpacity, type, numberOfLines} = this.props;
     return (
-    <TouchableOpacity
-      onPress={onPress}
-      style={[styles.button, styles[size], {backgroundColor: colorMap[type]}, disabled && styles.disabled, style]}
-      activeOpacity={activeOpacity}
-    >
-      <Text style={[styles.text, textStyle]} numberOfLines={numberOfLines}>
-      {
-        this.props.children
-      }
-      </Text>
-    </TouchableOpacity>
+      <TouchableOpacity
+        onPress={onPress}
+        style={[styles.button, styles[size], {backgroundColor: colorMap[type]}, disabled && styles.disabled, style]}
+        activeOpacity={activeOpacity}
+      >
+        <Text style={[styles.text, textStyle]} numberOfLines={numberOfLines}>
+          {
+            this.props.children
+          }
+        </Text>
+      </TouchableOpacity>
     );
   }
 }

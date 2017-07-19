@@ -7,7 +7,8 @@ import {
   FlatList,
   Picker,
   Dimensions,
-  TouchableOpacity
+  TouchableOpacity,
+  Platform
 } from 'react-native';
 
 import Icon from '../../component/icon';
@@ -202,7 +203,7 @@ class InvoiceList extends PureComponent {
     return (
       <View style={styles.queryFooter}>
         <Text style={{fontSize: 12}}>
-         查询结果: {this.state.total}条
+          查询结果: {this.state.total}条
         </Text>
       </View>
     )
@@ -355,7 +356,8 @@ const styles = StyleSheet.create({
     flex: 1,
     borderWidth: 1,
     borderColor: '#008cee',
-    borderRadius: 4
+    borderRadius: 4,
+    overflow: 'hidden'
   },
   picker: {
     height: 36
@@ -367,7 +369,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     borderRadius: 4,
     marginHorizontal: 5,
-    height: Dimensions.get('window').height - 282
+    height: Dimensions.get('window').height - (Platform.OS === 'ios' ? 258 : 282)
   },
   scrollview: {
     flex: 1

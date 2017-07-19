@@ -87,11 +87,11 @@ class Home extends PureComponent {
   }
 
   _getValueByStatus(status){
-     let result = this.state.data.statusTotal.find((item) => {
-       return item.status === status;
-     });
+    let result = this.state.data.statusTotal.find((item) => {
+      return item.status === status;
+    });
 
-     return String(result ? (result.total || 0) : 0);
+    return String(result ? (result.total || 0) : 0);
   }
 
   _getSuccessCount(data){
@@ -249,7 +249,7 @@ const styles = StyleSheet.create({
     marginRight: 'auto'
   },
   buttonGroupWrap: {
-    width: 90
+    width: 100
   },
   gbutton: {
     marginBottom: 2,

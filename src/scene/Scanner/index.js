@@ -183,7 +183,7 @@ export default class DefaultScreen extends Component {
 
     this.isScaned = true;
 
-    let isExpectQrcode = e.type === 'QR_CODE';
+    let isExpectQrcode = true;
     let ret = e.data.split(",");
     if (ret.length < 3) {
       isExpectQrcode = false;

@@ -425,19 +425,14 @@ class QRScannerView extends Component {
     super(props);
     //通过这句代码屏蔽 YellowBox
     console.disableYellowBox = true;
-    this.camera = null;
   }
 
   render() {
     return (
       <View style={{flex: 1}}>
-
         <Camera
           {...this.props}
           style={[{flex: 1}, this.props.style]}
-          ref={(cam) => {
-            this.camera = cam;
-          }}
         >
 
           {/*绘制顶部标题栏组件*/}

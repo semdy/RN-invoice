@@ -1,3 +1,4 @@
+import Toast from 'react-native-root-toast';
 
 export const serverUrl = "http://139.224.2.4:9000/";
 
@@ -44,6 +45,7 @@ let fetchApi = (url, params) => {
         resolve(data);
       })
       .catch(err => {
+        Toast.show("与服务器连接失败", {duration: Toast.durations.LONG});
         reject(err);
       });
   });

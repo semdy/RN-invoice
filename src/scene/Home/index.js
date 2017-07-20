@@ -62,7 +62,10 @@ class Home extends PureComponent {
         loaded: true
       });
     }, err => {
-      Toast.show(err);
+      this.setState({
+        loaded: true
+      });
+      //Toast.show(err);
     });
   }
 

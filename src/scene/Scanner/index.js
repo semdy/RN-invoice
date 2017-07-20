@@ -79,7 +79,7 @@ export default class DefaultScreen extends Component {
   }
 
   handleGoBack() {
-    this.props.navigation.goBack();
+    this.props.navigation.navigate("Home");
   }
 
   handleCapture() {

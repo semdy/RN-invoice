@@ -46,6 +46,7 @@ export default class ListTable extends PureComponent {
                 editable={item.editable}
                 label={item.label}
                 content={item.content}
+                datepicker={item.datepicker}
               />
             )
           })

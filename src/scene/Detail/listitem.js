@@ -17,7 +17,7 @@ class ListItem extends PureComponent {
   }
 
   render() {
-    let {label, content, style, labelStyle, contentStyle, editable} = this.props;
+    let {label, content, style, labelStyle, contentStyle, editable, datepicker} = this.props;
     return (
       <View style={[styles.listItem, style]}>
         {
@@ -26,7 +26,7 @@ class ListItem extends PureComponent {
         }
         {
           editable ?
-          <FormItem ref="input" defaultValue={content} style={{flex: 1, marginBottom: 0}}/> :
+          <FormItem ref="input" datepicker={datepicker} defaultValue={content} style={{flex: 1, marginBottom: 0}}/> :
           <Text style={[styles.content, contentStyle]}>{content}</Text>
         }
       </View>

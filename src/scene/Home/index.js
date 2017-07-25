@@ -16,6 +16,7 @@ import ListItem from '../../component/listitem';
 import ProgressCircle from 'react-native-progress-circle';
 import Spinner from '../../component/spinner';
 import Toast from 'react-native-root-toast';
+import FormItem from '../../component/formitem';
 
 class Home extends PureComponent {
 

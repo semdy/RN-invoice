@@ -6,23 +6,47 @@ import {
   StyleSheet
 } from 'react-native';
 
+import DatePicker from 'react-native-datepicker'
+
 class FormItem extends PureComponent {
   constructor(props){
     super(props);
-    this.value = this.props.defaultValue;
+    this.state = {
+      value: this.props.defaultValue
+    };
     this.isReceived = false;
   }
   handleChange(text){
-    this.value = text;
+    this.setState({
+      value: text
+    });
     this.props.onChangeText(text);
   }
   componentWillReceiveProps(nextProps) {
     if( this.isReceived ) return;
-    this.value = nextProps.defaultValue;
+    this.setState({
+      value: nextProps.defaultValue
+    });
     this.isReceived = true;
   }
+  get value(){
+    return this.state.value;
+  }
   render() {
-    let {label, size, style, labelStyle, labelTextStyle, inputStyle, password, placeholderTextColor, ...inputProps} = this.props;
+    let {
+      label,
+      size,
+      style,
+      labelStyle,
+      labelTextStyle,
+      inputStyle,
+      password,
+      placeholderTextColor,
+      datepickerProps,
+      datepicker,
+      ...inputProps
+    } = this.props;
+
     return (
       <View style={[styles.container, style]}>
         {
@@ -33,12 +57,24 @@ class FormItem extends PureComponent {
         }
         <TextInput
           {...inputProps}
+          defaultValue={this.state.value}
           style={[styles.input, styles[size], inputStyle]}
           underlineColorAndroid="transparent"
           placeholderTextColor={placeholderTextColor}
           secureTextEntry={password}
           onChangeText={this.handleChange.bind(this)}
         />
+        {
+          datepicker &&
+          <DatePicker
+            {...datepickerProps}
+            style={styles.datepicker}
+            hideText={true}
+            showIcon={false}
+            date={this.state.value}
+            onDateChange={this.handleChange.bind(this)}
+          />
+        }
       </View>
     );
   }
@@ -80,6 +116,13 @@ const styles = StyleSheet.create({
   },
   large: {
     height: 42
+  },
+  datepicker: {
+    position: "absolute",
+    left: 0,
+    top: 0,
+    width: '100%',
+    height: '100%'
   }
 });
 
@@ -92,7 +135,9 @@ FormItem.defaultProps = {
   labelTextStyle: {},
   placeholderTextColor: "#ccc",
   size: 'normal',
-  defaultValue: ""
+  defaultValue: "",
+  datepicker: false,
+  datepickerProps: {}
 };
 
 FormItem.propTypes = {
@@ -104,7 +149,9 @@ FormItem.propTypes = {
   labelTextStyle: PropTypes.any,
   placeholderTextColor: PropTypes.string,
   size: PropTypes.string,
-  defaultValue: PropTypes.string
+  defaultValue: PropTypes.string,
+  datepicker: PropTypes.bool,
+  datepickerProps: PropTypes.object
 };
 
 export default FormItem;

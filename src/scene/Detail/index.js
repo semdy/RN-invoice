@@ -44,7 +44,8 @@ const dataSource = [
     content: '',
     key: "issueDate",
     paramKey: "issueDate",
-    editableKey: "issueDateMark"
+    editableKey: "issueDateMark",
+    datepicker: true
   },
   {
     label: "税前金额",
@@ -198,6 +199,12 @@ class Detail extends PureComponent {
       }
     });
 
+    if(params.invoicePrice !== undefined && !/^\d+(\.)?\d*$/.test(params.invoicePrice)){
+      return Toast.show("请输入合法的税前金额");
+    }
+    else if(params.invoiceCode !== undefined && !/^\d{10}$/.test(params.invoiceCode)){
+      return Toast.show("请输入10位数字的发票代码");
+    }
     if(params.invoiceCode !== undefined && !/^\d{10}$/.test(params.invoiceCode)){
       return Toast.show("请输入10位数字的发票代码");
     }

@@ -6,7 +6,8 @@ import {
   StyleSheet,
   Dimensions,
   TouchableOpacity,
-  DeviceEventEmitter
+  DeviceEventEmitter,
+  KeyboardAvoidingView
 } from 'react-native';
 
 import Icon from '../../component/icon';
@@ -277,93 +278,94 @@ class Detail extends PureComponent {
         >
           发票详情
         </Header>
-        <View style={styles.page}>
-          <View style={styles.viewContainer}>
+
+        <KeyboardAvoidingView behavior="position">
+          <View style={styles.page}>
+            <View style={styles.viewContainer}>
+              {
+                picturePath ?
+                <TouchableOpacity
+                  activeOpacity={0.7}
+                  style={{flex: 1}}
+                  onPress={this.showPhoto.bind(this)}
+                >
+                  <Image
+                    style={styles.invoiceImg}
+                    source={{uri: serverUrl + picturePath}}
+                  />
+                </TouchableOpacity>
+                :
+                <View style={styles.qrcodeHintContainer}>
+                  <Text style={styles.qrcodeHintText}>此发票通过二维码识别</Text>
+                </View>
+              }
+            </View>
+
+            <ScrollableTabView
+              renderTabBar={() =>
+                <View style={styles.tabBar}>
+                  <ButtonGroup
+                    items={[{text: '发票信息'}, {text: '销货明细'}]}
+                    activeIndex={activeIndex}
+                    onPress={this.handleTabClick.bind(this)}
+                  />
+                </View>}
+              style={styles.tabContainer}
+              tabBarActiveTextColor='#FE566D'
+              tabBarInactiveTextColor='#555555'
+              tabBarTextStyle={styles.tabBarText}
+              tabBarUnderlineStyle={styles.tabBarUnderline}
+              initialPage={activeIndex}
+              page={activeIndex}
+              onChangeTab={this.handleTabChangle.bind(this)}
+            >
+              <ListTable
+                ref="invoicetable"
+                tabLabel="发票信息"
+                dataSource={invoiceData}
+                style={[styles.listTable, {backgroundColor: '#fff'}, !picturePath && styles.noPic]}
+                renderFooter={() =>
+                  <View style={styles.buttonField}>
+                    <Button
+                      size="small"
+                      style={{width: 100}}
+                      disabled={!canUpdate}
+                      onPress={this.handleUpdate.bind(this)}
+                    >
+                      更新
+                    </Button>
+                  </View>
+                }
+              />
+              <ListTableSales
+                tabLabel="销货明细"
+                dataSource={prodData}
+                style={[styles.listTable, !prodData.length ? styles.noData : {paddingVertical: 0}, !picturePath && styles.noPic]}
+                renderEmpty={() =>
+                  <TouchableOpacity
+                    style={styles.uploadButton}
+                    onPress={this.handleUploadSales.bind(this)}
+                  >
+                    <Icon name="plus" size="large" style={{opacity: 0.5}}/>
+                    <Text style={styles.uploadHintText}>请拍摄销货清单</Text>
+                  </TouchableOpacity>
+                }
+                renderFooter={() =>
+                  <View style={[styles.queryFooter, !prodData.length && styles.queryFooterEmpty]}>
+                    <Text style={{fontSize: 12}}>
+                      查询结果: {prodData.length}条
+                    </Text>
+                  </View>
+                }
+              />
+            </ScrollableTabView>
+
             {
-              picturePath ?
-              <TouchableOpacity
-                activeOpacity={0.7}
-                style={{flex: 1}}
-                onPress={this.showPhoto.bind(this)}
-              >
-                <Image
-                  style={styles.invoiceImg}
-                  source={{uri: serverUrl + picturePath}}
-                />
-              </TouchableOpacity>
-              :
-              <View style={styles.qrcodeHintContainer}>
-                <Text style={styles.qrcodeHintText}>此发票通过二维码识别</Text>
-              </View>
+              !loaded &&
+              <Spinner/>
             }
           </View>
-
-          <ScrollableTabView
-            renderTabBar={() =>
-              <View style={styles.tabBar}>
-                <ButtonGroup
-                  items={[{text: '发票信息'}, {text: '销货明细'}]}
-                  activeIndex={activeIndex}
-                  onPress={this.handleTabClick.bind(this)}
-                />
-              </View>}
-            style={styles.tabContainer}
-            tabBarActiveTextColor='#FE566D'
-            tabBarInactiveTextColor='#555555'
-            tabBarTextStyle={styles.tabBarText}
-            tabBarUnderlineStyle={styles.tabBarUnderline}
-            initialPage={activeIndex}
-            page={activeIndex}
-            onChangeTab={this.handleTabChangle.bind(this)}
-          >
-            <ListTable
-              ref="invoicetable"
-              tabLabel="发票信息"
-              dataSource={invoiceData}
-              style={[styles.listTable, {backgroundColor: '#fff'}, !picturePath && styles.noPic]}
-              renderFooter={() =>
-                <View style={styles.buttonField}>
-                  <Button
-                    size="small"
-                    style={{width: 100}}
-                    disabled={!canUpdate}
-                    onPress={this.handleUpdate.bind(this)}
-                  >
-                    更新
-                  </Button>
-                </View>
-              }
-            />
-            <ListTableSales
-              tabLabel="销货明细"
-              dataSource={prodData}
-              style={[styles.listTable, !prodData.length ? styles.noData : {paddingVertical: 0}, !picturePath && styles.noPic]}
-              renderEmpty={() =>
-                <TouchableOpacity
-                  style={styles.uploadButton}
-                  onPress={this.handleUploadSales.bind(this)}
-                >
-                  <Icon name="plus" size="large" style={{opacity: 0.5}}/>
-                  <Text style={styles.uploadHintText}>请拍摄销货清单</Text>
-                </TouchableOpacity>
-              }
-              renderFooter={() =>
-                <View style={[styles.queryFooter, !prodData.length && styles.queryFooterEmpty]}>
-                  <Text style={{fontSize: 12}}>
-                    查询结果: {prodData.length}条
-                  </Text>
-                </View>
-              }
-            />
-          </ScrollableTabView>
-
-          {
-            !loaded &&
-            <Spinner/>
-          }
-
-        </View>
-
+        </KeyboardAvoidingView>
       </View>
     );
   }
@@ -377,14 +379,14 @@ const styles = StyleSheet.create({
   page: {
     paddingVertical: 5,
     paddingHorizontal: 5,
-    flex: 1
+    height: Dimensions.get("window").height - 60
   },
   viewContainer: {
     height: 140,
     overflow: 'hidden'
   },
   tabContainer: {
-
+    flex: 1
   },
   invoiceImg: {
     width: '100%',

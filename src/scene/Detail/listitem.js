@@ -36,7 +36,6 @@ class ListItem extends PureComponent {
 
 const styles = StyleSheet.create({
   listItem: {
-    flex: 1,
     flexDirection: 'row'
   },
   label: {

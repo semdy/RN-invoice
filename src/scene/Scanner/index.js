@@ -79,7 +79,8 @@ export default class DefaultScreen extends Component {
   }
 
   handleGoBack() {
-    this.props.navigation.navigate("Home");
+    //this.props.navigation.navigate("Home");
+    this.props.navigation.goBack();
   }
 
   handleCapture() {

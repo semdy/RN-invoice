@@ -14,23 +14,25 @@ class FormItem extends PureComponent {
     this.state = {
       value: this.props.defaultValue
     };
-    this.isReceived = false;
   }
-  handleChange(text){
+  handleChange(value){
     this.setState({
-      value: text
+      value
     });
-    this.props.onChangeText(text);
+    this.props.onChangeText(value);
   }
   componentWillReceiveProps(nextProps) {
-    if( this.isReceived ) return;
-    this.setState({
-      value: nextProps.defaultValue
-    });
-    this.isReceived = true;
+    if( nextProps.defaultValue !== this.props.defaultValue ) {
+      this.setState({
+        value: nextProps.defaultValue
+      });
+    }
   }
   get value(){
     return this.state.value;
+  }
+  set value(value){
+    this.handleChange(value);
   }
   render() {
     let {

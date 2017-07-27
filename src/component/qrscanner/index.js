@@ -4,6 +4,4 @@
  * Desc:
  */
 
-import QRScannerView from './QRScanner';
-
-export {QRScannerView}
+export {QRScannerView, QRScannerRectView} from './QRScanner'

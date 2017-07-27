@@ -13,15 +13,14 @@ import
   Animated,
   Easing,
   Text,
-  Image,
-  Dimensions
+  Image
 } from 'react-native';
 
 /**
  * 扫描界面遮罩
  * 单独写一个类，方便拷贝使用
  */
-class QRScannerRectView extends Component {
+export class QRScannerRectView extends Component {
   static defaultProps = {
     maskColor: '#0000004D',
     cornerColor: '#22ff00',
@@ -391,7 +390,7 @@ class QRScannerRectView extends Component {
 /**
  * 扫描界面
  */
-class QRScannerView extends Component {
+export class QRScannerView extends Component {
   static propTypes = {
     maskColor: React.PropTypes.string,
     borderColor: React.PropTypes.string,
@@ -538,6 +537,3 @@ const styles = StyleSheet.create({
     bottom: 0,
   }
 });
-
-
-export default QRScannerView;

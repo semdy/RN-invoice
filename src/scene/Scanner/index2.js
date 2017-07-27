@@ -11,7 +11,7 @@ import {
 import Toast from 'react-native-root-toast';
 import Header from '../../component/header';
 import Icon from '../../component/icon';
-import {QRScannerRectView} from '../../component/qrscanner';
+import {QRScannerView, QRScannerRectView} from '../../component/qrscanner';
 import Spinner from '../../component/spinner';
 import fetch from '../../service/fetch';
 import {session} from '../../service/auth';
@@ -27,7 +27,8 @@ export default class DefaultScreen extends Component {
 
     this.state = {
       loaded: true,
-      cameraEnable: false
+      cameraEnable: false,
+      torchMode: 'off'
     };
 
     this.timeId = null;
@@ -90,7 +91,9 @@ export default class DefaultScreen extends Component {
   }
 
   switchTorchMode() {
-    this.props.switchTorchMode();
+    this.setState({
+      torchMode: this.state.torchMode === 'on' ? 'off' : 'on'
+    });
   }
 
   componentDidMount() {
@@ -105,16 +108,10 @@ export default class DefaultScreen extends Component {
     if( this.timeId ) clearTimeout(this.timeId);
   }
 
-  componentWillReceiveProps(nextProps){
-    if( nextProps.barCode ){
-      this.barcodeReceived(nextProps.barCode);
-    }
-  }
-
   render() {
     let {loaded, cameraEnable} = this.state;
     return (
-      <View style={[styles.container, this.props.style]}>
+      <View style={styles.container}>
         <Header
           left={(
             <Icon name="arrow-left-white" onPress={this.handleGoBack.bind(this)}/>
@@ -126,13 +123,16 @@ export default class DefaultScreen extends Component {
           二维码扫描
         </Header>
         <View style={styles.cameraWrap}>
-          <QRScannerRectView
+          <QRScannerView
             onBarCodeRead={this.barcodeReceived.bind(this)}
             renderTopBarView={() => function () {}}
             renderBottomMenuView={() => function () {}}
             hintText="请将发票左上角的二维码放入框内即可自动扫描"
             hintTextPosition={80}
             style={styles.preview}
+            torchMode={this.state.torchMode}
+            barCodeTypes={['qr']}
+            defaultTouchToFocus={true}
           />
         </View>
         {

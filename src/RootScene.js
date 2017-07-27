@@ -62,7 +62,8 @@ const Navigator = StackNavigator(
     }
   },
   {
-    headerMode: 'none'
+    headerMode: 'none',
+    initialRouteName: 'Home'
   }
 );
 

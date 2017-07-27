@@ -4,6 +4,7 @@ import {
   View,
   StyleSheet,
   Image,
+  TouchableOpacity,
   TouchableWithoutFeedback
 } from 'react-native'
 
@@ -56,6 +57,8 @@ function genIconPath(props){
       return require('../../img/plus.png');
     case 'qrcode':
       return require('../../img/qrcode.png');
+    case 'qrcode-land':
+      return require('../../img/qrcode-land.png');
     case 'camera-white':
       return require('../../img/camera-white.png');
     case 'angle-down':
@@ -75,7 +78,8 @@ class Icon extends PureComponent{
     name: '',
     size: 'normal',
     style: {},
-    iconStyle: {}
+    iconStyle: {},
+    activeOpacity: 0.6
   };
 
   static propTypes = {
@@ -84,25 +88,30 @@ class Icon extends PureComponent{
     size: PropTypes.string,
     style: PropTypes.any,
     iconStyle: PropTypes.any,
-    onPress: PropTypes.func
+    onPress: PropTypes.func,
+    activeOpacity: PropTypes.number
   };
 
   render(){
-    let {onPress, size, style, iconStyle} = this.props;
+    let {onPress, size, style, iconStyle, activeOpacity} = this.props;
     let icon = (
-      <View style={[{padding: 8}, style]}>
         <Image style={[styles["icon" + captialize(size)], iconStyle]} source={genIconPath(this.props)}/>
-      </View>
     );
     return (
       onPress ?
-      <TouchableWithoutFeedback
+      <TouchableOpacity
+        activeOpacity={activeOpacity}
+        style={[{padding: 8}, style]}
         onPress={onPress.bind(this)}
       >
         {icon}
-      </TouchableWithoutFeedback>
+      </TouchableOpacity>
       :
-      icon
+      <View
+        style={[{padding: 8}, style]}
+      >
+        {icon}
+      </View>
     )
   }
 }

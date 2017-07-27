@@ -10,6 +10,7 @@ import {
 
 import Button from '../../component/button';
 import FormItem from '../../component/formitem';
+import Spinner from '../../component/spinner';
 import LinearGradient from 'react-native-linear-gradient';
 import {login, session} from '../../service/auth';
 
@@ -77,9 +78,10 @@ class Login extends PureComponent {
                   disabled={isLogining}
                   onPress={this.handleClick.bind(this)}
                   style={styles.loginButton}
+                  disableStyle={styles.disabledButton}
                   textStyle={{fontSize: 16, fontWeight: 'bold'}}
                 >
-                  登录
+                  {isLogining ? "登录中..." : "登录"}
                 </Button>
               </View>
             </View>
@@ -88,6 +90,12 @@ class Login extends PureComponent {
             上海阙天商务信息咨询有限公司
           </Text>
         </LinearGradient>
+
+        {
+          isLogining &&
+          <Spinner/>
+        }
+
       </View>
     );
   }
@@ -141,6 +149,9 @@ const styles = StyleSheet.create({
     borderColor: "#0090ff",
     borderWidth: 2,
     backgroundColor: "#6ea4dd"
+  },
+  disabledButton: {
+    opacity: .6
   },
   footer: {
     position: "absolute",

@@ -15,12 +15,19 @@ const colorMap = {
 };
 
 class Button extends PureComponent {
+
+  handlePress(e){
+    if( !this.props.disabled ) {
+      this.props.onPress(e);
+    }
+  }
+
   render() {
-    let {disabled, onPress, style, textStyle, size, activeOpacity, type, numberOfLines} = this.props;
+    let {disabled, style, disableStyle, textStyle, size, activeOpacity, type, numberOfLines} = this.props;
     return (
       <TouchableOpacity
-        onPress={onPress}
-        style={[styles.button, styles[size], {backgroundColor: colorMap[type]}, disabled && styles.disabled, style]}
+        onPress={this.handlePress.bind(this)}
+        style={[styles.button, styles[size], {backgroundColor: colorMap[type]}, style, disabled && styles.disabled, disableStyle]}
         activeOpacity={activeOpacity}
       >
         <Text style={[styles.text, textStyle]} numberOfLines={numberOfLines}>
@@ -65,6 +72,7 @@ Button.defaultProps = {
   disabled: false,
   onPress: function(){},
   style: {},
+  disableStyle: {},
   textStyle: {},
   type: 'primary',
   size: 'normal',
@@ -76,6 +84,7 @@ Button.propTypes = {
   disabled: PropTypes.bool,
   onPress: PropTypes.func,
   style: PropTypes.any,
+  disableStyle: PropTypes.any,
   textStyle: PropTypes.any,
   type: PropTypes.string,
   size: PropTypes.string,

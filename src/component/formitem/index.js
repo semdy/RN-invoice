@@ -34,6 +34,15 @@ class FormItem extends PureComponent {
   set value(value){
     this.handleChange(value);
   }
+  isFocused(){
+    return this.refs.input.isFocused();
+  }
+  clear(){
+    this.refs.input.clear();
+  }
+  blur(){
+    this.refs.input.blur();
+  }
   render() {
     let {
       label,
@@ -58,6 +67,7 @@ class FormItem extends PureComponent {
           </View>
         }
         <TextInput
+          ref="input"
           {...inputProps}
           defaultValue={this.state.value}
           style={[styles.input, styles[size], inputStyle]}

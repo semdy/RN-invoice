@@ -34,6 +34,7 @@ class Login extends PureComponent {
       isLogining: true
     });
     login(username, password).then(userinfo => {
+      this.refs.password.blur();
       session.set(userinfo);
       this.props.navigation.navigate('Home', userinfo);
     }, errMsg => {

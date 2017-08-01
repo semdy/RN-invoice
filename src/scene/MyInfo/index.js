@@ -96,7 +96,11 @@ class MyInfo extends PureComponent {
           loaded: true
         });
       }
-    })
+    }, err => {
+      this.setState({
+        loaded: true
+      });
+    });
   }
 
   render() {

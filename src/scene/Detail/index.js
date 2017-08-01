@@ -379,7 +379,7 @@ const styles = StyleSheet.create({
   page: {
     paddingVertical: 5,
     paddingHorizontal: 5,
-    height: Dimensions.get("window").height - 60
+    height: Dimensions.get("window").height - 75
   },
   viewContainer: {
     height: 140,

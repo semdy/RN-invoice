@@ -43,7 +43,7 @@ export default class ListTable extends PureComponent {
               <ListItem
                 ref={item.key}
                 key={i}
-                editable={true}
+                editable={item.editable}
                 label={item.label}
                 content={item.content}
                 datepicker={item.datepicker}

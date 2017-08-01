@@ -6,8 +6,7 @@ import {
   StyleSheet,
   Dimensions,
   TouchableOpacity,
-  DeviceEventEmitter,
-  KeyboardAvoidingView
+  DeviceEventEmitter
 } from 'react-native';
 
 import Icon from '../../component/icon';
@@ -24,6 +23,7 @@ import ListTableSales from './ListTableSales';
 import fetch, {serverUrl} from '../../service/fetch';
 import {confirm} from '../../utils';
 import Toast from 'react-native-root-toast';
+import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 
 const dataSource = [
   {
@@ -279,7 +279,7 @@ class Detail extends PureComponent {
           发票详情
         </Header>
 
-        <KeyboardAvoidingView behavior="position">
+        <KeyboardAwareScrollView>
           <View style={styles.page}>
             <View style={styles.viewContainer}>
               {
@@ -365,7 +365,7 @@ class Detail extends PureComponent {
               <Spinner/>
             }
           </View>
-        </KeyboardAvoidingView>
+        </KeyboardAwareScrollView>
       </View>
     );
   }

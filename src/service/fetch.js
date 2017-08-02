@@ -1,6 +1,6 @@
 import Toast from 'react-native-root-toast';
 
-export const serverUrl = "http://139.224.2.4:9000/";
+export const serverUrl = "http://fpserver.qtdatas.com/";
 
 function formatParam(params){
   let ret = [];

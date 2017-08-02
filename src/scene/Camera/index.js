@@ -61,7 +61,8 @@ export default class DefaultScreen extends Component {
   uploadInvoice(){
     return fetch.post("upload", {customer: session.get().id, file: this.state.captureImgURI}).then(data => {
       this.setState({
-        loaded: true
+        loaded: true,
+        captureImgURI: null
       });
 
       if( data === true ){
@@ -87,7 +88,8 @@ export default class DefaultScreen extends Component {
     };
     return fetch.post("uploadSales", params).then(data => {
       this.setState({
-        loaded: true
+        loaded: true,
+        captureImgURI: null
       });
 
       if( data === true ){

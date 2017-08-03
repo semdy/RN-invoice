@@ -34,6 +34,9 @@ export default class DefaultScreen extends Component {
   }
 
   captureDone( isGoHome ){
+
+    if( !this.state.loaded ) return;
+
     this.setState({
       loaded: false
     });

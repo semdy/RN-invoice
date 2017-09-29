@@ -206,9 +206,6 @@ class Detail extends PureComponent {
     else if(params.invoiceCode !== undefined && !/^\d{10}$/.test(params.invoiceCode)){
       return Toast.show("请输入10位数字的发票代码");
     }
-    if(params.invoiceCode !== undefined && !/^\d{10}$/.test(params.invoiceCode)){
-      return Toast.show("请输入10位数字的发票代码");
-    }
     else if(params.invoiceNumber !== undefined && !/^\d{8}$/.test(params.invoiceNumber)){
       return Toast.show("请输入8位数字的发票号码");
     }

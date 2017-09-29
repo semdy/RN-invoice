@@ -371,7 +371,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     borderRadius: 4,
     marginHorizontal: 5,
-    height: Dimensions.get('window').height - (Platform.OS === 'ios' ? 258 : 282)
+    height: Dimensions.get('window').height - (Platform.OS === 'ios' ? 278 : 282)
   },
   scrollview: {
     flex: 1

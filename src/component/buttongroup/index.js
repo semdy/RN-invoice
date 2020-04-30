@@ -52,7 +52,7 @@ const styles = StyleSheet.create({
     borderColor: '#38adff',
     justifyContent: 'center',
     alignItems: 'center',
-    paddingHorizontal: 12
+    paddingHorizontal: 15
   },
   normal: {
     height: 38
